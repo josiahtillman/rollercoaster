@@ -8,18 +8,37 @@ var bufferId;
 var umv;
 var uproj;
 
-var groundx;
 var carx;
 var cary;
 var carz;
+
 var moving;
 var wheelRotation;
 var shapePoints;
 var carposition;
+
 var lookatx;
 var lookaty;
 var lookatz;
+
 var fileExists;
+
+var railtieStart;
+var railtieLength;
+var railstart;
+var railLength;
+var carStart;
+var carLength;
+var wheelfaceStart;
+var wheelfaceLength;
+var wheelrimStart;
+var wheelrimLength;
+var riderHeadStart;
+var riderHeadLength;
+var riderGlassesStart;
+var riderGlassesLength;
+
+var riderRotation;
 
 
 window.onload = function init() {
@@ -45,8 +64,10 @@ window.onload = function init() {
     lookatx = 0;
     lookaty = 20;
     lookatz = 40;
+    riderRotation = 0;
 
     window.addEventListener("keydown", function(event) {
+        console.log(event.key);
         switch (event.key) {
             // "m" makes the car move
             case "m":
@@ -56,7 +77,15 @@ window.onload = function init() {
                     moving = true;
                 }
                 break;
-                // various camera angles for testing purposes
+            case "ArrowLeft": //left
+                riderRotation=riderRotation-5;
+                console.log(riderRotation);
+                break;
+            case "ArrowRight": //right
+                riderRotation=riderRotation+5;
+                console.log(riderRotation);
+                break;
+            // various camera angles for testing purposes
             case "0":
                 lookatx = 20;
                 lookaty = 10;
@@ -118,6 +147,8 @@ window.onload = function init() {
 function parseData(input) {
 
     makeShapes();
+
+    railtieStart = shapePoints.length/2;
 
     // This is a 3D rail tie
     shapePoints.push(vec4(1.5, 0.1, 0.1, 1.0));
@@ -198,6 +229,9 @@ function parseData(input) {
     shapePoints.push(vec4(-1.5, 0.1, 0.1, 1.0));
     shapePoints.push(vec4(0.5, 0.3, 0.1, 1.0)); // brown
 
+    railtieLength = shapePoints.length/2 - railtieStart;
+    railstart = shapePoints.length/2;
+
     // The rails
     shapePoints.push(vec4(-0.1, 0.2, 0, 1.0));
     shapePoints.push(vec4(0.0, 0.0, 0.0, 1.0)); // black
@@ -251,6 +285,8 @@ function parseData(input) {
     shapePoints.push(vec4(0.1, 0.2, 0, 1.0));
     shapePoints.push(vec4(0.0, 0.0, 0.0, 1.0)); // black
 
+    railLength = shapePoints.length/2 - railstart;
+
     carposition = input.split(/\s+/); //split on white space
 
     // scale the track points down
@@ -274,6 +310,8 @@ function makeShapes() {
     shapePoints.push(vec4(0.0, 1.0, 0.0, 1.0)); //green
     shapePoints.push(vec4(-20, -20, 0.0, 1.0));
     shapePoints.push(vec4(0.0, 1.0, 0.0, 1.0)); //green
+
+    carStart = shapePoints.length/2;
 
     // The car
     // red side
@@ -332,7 +370,7 @@ function makeShapes() {
     shapePoints.push(vec4(-1.5, 0.5, -1.0, 1.0));
     shapePoints.push(vec4(0.0, 1.0, 1.0, 1.0)); //color
 
-    // red side
+    // yellow side
     shapePoints.push(vec4(1.5, -0.5, -1.0, 1.0));
     shapePoints.push(vec4(1.0, 1.0, 0.0, 1.0)); //color
     shapePoints.push(vec4(1.5, -0.5, 1.0, 1.0));
@@ -346,6 +384,22 @@ function makeShapes() {
     shapePoints.push(vec4(-1.5, -0.5, 1.0, 1.0));
     shapePoints.push(vec4(1.0, 1.0, 0.0, 1.0)); //color
 
+    // top yellow side
+    shapePoints.push(vec4(1.5, 0.5, -1.0, 1.0));
+    shapePoints.push(vec4(1.0, 1.0, 0.0, 1.0)); //color
+    shapePoints.push(vec4(1.5, 0.5, 1.0, 1.0));
+    shapePoints.push(vec4(1.0, 1.0, 0.0, 1.0)); //color
+    shapePoints.push(vec4(-1.5, 0.5, -1.0, 1.0));
+    shapePoints.push(vec4(1.0, 1.0, 0.0, 1.0)); //color
+    shapePoints.push(vec4(1.5, 0.5, 1.0, 1.0));
+    shapePoints.push(vec4(1.0, 1.0, 0.0, 1.0)); //color
+    shapePoints.push(vec4(-1.5, 0.5, -1.0, 1.0));
+    shapePoints.push(vec4(1.0, 1.0, 0.0, 1.0)); //color
+    shapePoints.push(vec4(-1.5, 0.5, 1.0, 1.0));
+    shapePoints.push(vec4(1.0, 1.0, 0.0, 1.0)); //color
+
+    carLength = shapePoints.length/2 - carStart;
+
     // TODO use define statements to give names to the indices
     // TODO use a seperate file with the indices for different objects (mesh)?
 
@@ -353,6 +407,8 @@ function makeShapes() {
     var vertexNum = 50;
     moving = false;
     wheelRotation = 0;
+
+    wheelfaceStart = shapePoints.length/2;
 
     for (var i = 0; i < vertexNum; i++) {
         var percent = i / (vertexNum - 1);
@@ -368,21 +424,69 @@ function makeShapes() {
         }
     }
 
+    wheelfaceLength = shapePoints.length/2 - wheelfaceStart;
+    wheelrimStart = shapePoints.length/2;
+
     // wheel rim
     for (var i = 0; i < vertexNum; i++) {
         var percent = i / (vertexNum - 1);
         var radians = 2 * Math.PI * percent;
-        var x = 0.0 + 0.5 * Math.cos(radians);
-        var y = 0.0 + 0.5 * Math.sin(radians);
+        var x = 0.5 * Math.cos(radians);
+        var y = 0.5 * Math.sin(radians);
         shapePoints.push(vec4(x, y, -0.125, 1.0));
         shapePoints.push(vec4(0.0, 0.0, 0.0, 1.0));
         shapePoints.push(vec4(x, y, 0.125, 1.0));
         shapePoints.push(vec4(0.0, 0.0, 0.0, 1.0));
     }
 
-    groundx = 90
+    wheelrimLength = shapePoints.length/2 - wheelrimStart;
+
+    generateSphere(15);
 
     bufferShapes();
+}
+
+function generateSphere(subdiv){
+
+    var step = (360.0 / subdiv)*(Math.PI / 180.0); //how much do we increase the angles by per triangle?
+
+    riderHeadStart = shapePoints.length/2;
+
+    for (var lat = 0; lat <= Math.PI ; lat += step){ //latitude
+        for (var lon = 0; lon + step <= 2*Math.PI; lon += step){ //longitude
+            //triangle 1
+            shapePoints.push(vec4(0.6*Math.sin(lat)*Math.cos(lon), 0.6*Math.sin(lon)*Math.sin(lat), 0.6*Math.cos(lat), 1.0)); //position
+            shapePoints.push(vec4(0.6*Math.sin(lat)*Math.cos(lon), 0.6*Math.sin(lon)*Math.sin(lat), 0.6*Math.cos(lat), 0.0)); //normal
+            shapePoints.push(vec4(0.6*Math.sin(lat)*Math.cos(lon+step), 0.6*Math.sin(lat)*Math.sin(lon+step), 0.6*Math.cos(lat), 1.0)); //position
+            shapePoints.push(vec4(0.6*Math.sin(lat)*Math.cos(lon+step), 0.6*Math.sin(lat)*Math.sin(lon+step), 0.6*Math.cos(lat), 0.0)); //normal
+            shapePoints.push(vec4(0.6*Math.sin(lat+step)*Math.cos(lon+step), 0.6*Math.sin(lon+step)*Math.sin(lat+step), 0.6*Math.cos(lat+step), 1.0)); //etc
+            shapePoints.push(vec4(0.6*Math.sin(lat+step)*Math.cos(lon+step), 0.6*Math.sin(lon+step)*Math.sin(lat+step), 0.6*Math.cos(lat+step), 0.0));
+
+            //triangle 2
+            shapePoints.push(vec4(0.6*Math.sin(lat+step)*Math.cos(lon+step), 0.6*Math.sin(lon+step)*Math.sin(lat+step), 0.6*Math.cos(lat+step), 1.0));
+            shapePoints.push(vec4(0.6*Math.sin(lat+step)*Math.cos(lon+step), 0.6*Math.sin(lon+step)*Math.sin(lat+step), 0.6*Math.cos(lat+step), 0.0));
+            shapePoints.push(vec4(0.6*Math.sin(lat+step)*Math.cos(lon), 0.6*Math.sin(lat+step)*Math.sin(lon), 0.6*Math.cos(lat+step), 1.0));
+            shapePoints.push(vec4(0.6*Math.sin(lat+step)*Math.cos(lon), 0.6*Math.sin(lat+step)*Math.sin(lon), 0.6*Math.cos(lat+step),0.0));
+            shapePoints.push(vec4(0.6*Math.sin(lat)*Math.cos(lon), 0.6*Math.sin(lon)*Math.sin(lat), 0.6*Math.cos(lat), 1.0));
+            shapePoints.push(vec4(0.6*Math.sin(lat)*Math.cos(lon), 0.6*Math.sin(lon)*Math.sin(lat), 0.6*Math.cos(lat), 0.0));
+        }
+    }
+
+    riderHeadLength = shapePoints.length/2 - riderHeadStart;
+
+    riderGlassesStart = shapePoints.length/2;
+
+    var vertexNum = 50;
+    for (var i = 0; i < vertexNum; i++) {
+        var percent = i / (vertexNum - 1);
+        var radians = 2 * Math.PI * percent;
+        var x = 0.2 * Math.cos(radians);
+        var y = 0.2 * Math.sin(radians);
+        shapePoints.push(vec4(x, y, 0, 1.0));
+        shapePoints.push(vec4(0.0, 0.0, 0.0, 1.0));
+    }
+
+    riderGlassesLength = shapePoints.length/2 - riderGlassesStart;
 }
 
 // Simple buffer method
@@ -432,7 +536,7 @@ function render() {
     //now set up the model view matrix and send it over as a uniform
     //the inputs to this lookAt are to move back 20 units, point at the origin, and the positive y axis is up
     var mv = lookAt(vec3(lookatx, lookaty, lookatz), vec3(0, 0, 0), vec3(0, 1, 0));
-    var newmv = mult(mv, rotateX(groundx));
+    var newmv = mult(mv, rotateX(90));
 
     gl.uniformMatrix4fv(umv, false, flatten(newmv));
 
@@ -467,7 +571,26 @@ function render() {
     newmv = matrix;
     newmv = mult(newmv, rotateX(180));
     gl.uniformMatrix4fv(umv, false, flatten(newmv));
-    gl.drawArrays(gl.TRIANGLES, 4, 30); // draw the car
+    gl.drawArrays(gl.TRIANGLES, carStart, carLength); // draw the car
+
+    newmv = matrix;
+    newmv = mult(newmv, translate(0, -1, 0));
+    gl.uniformMatrix4fv(umv, false, flatten(newmv));
+    gl.drawArrays(gl.TRIANGLES, riderHeadStart, riderHeadLength); // draw the rider
+
+    newmv = matrix;
+    newmv = mult(newmv, rotateY(riderRotation));
+    newmv = mult(newmv, translate(-0.6, -1, 0.25));
+    newmv = mult(newmv, rotateY(90));
+    gl.uniformMatrix4fv(umv, false, flatten(newmv));
+    gl.drawArrays(gl.TRIANGLE_FAN, riderGlassesStart, riderGlassesLength); // draw the glasses
+
+    newmv = matrix;
+    newmv = mult(newmv, rotateY(riderRotation));
+    newmv = mult(newmv, translate(-0.6, -1, -0.25));
+    newmv = mult(newmv, rotateY(90));
+    gl.uniformMatrix4fv(umv, false, flatten(newmv));
+    gl.drawArrays(gl.TRIANGLE_FAN, riderGlassesStart, riderGlassesLength); // draw the glasses
 
     // wheels
     // wheel 1
@@ -475,48 +598,48 @@ function render() {
     newmv = mult(newmv, translate(1, 0.5, 1.20));
     newmv = mult(newmv, rotateZ(wheelRotation));
     gl.uniformMatrix4fv(umv, false, flatten(newmv));
-    gl.drawArrays(gl.TRIANGLE_FAN, 34, 50);
+    gl.drawArrays(gl.TRIANGLE_FAN, wheelfaceStart, wheelfaceLength);
     newmv = matrix;
     newmv = mult(newmv, translate(1, 0.5, 1.125));
     newmv = mult(newmv, rotateZ(wheelRotation));
     gl.uniformMatrix4fv(umv, false, flatten(newmv));
-    gl.drawArrays(gl.TRIANGLE_STRIP, 84, 100);
+    gl.drawArrays(gl.TRIANGLE_STRIP, wheelrimStart, wheelrimLength);
 
     // wheel 2
     newmv = matrix;
     newmv = mult(newmv, translate(-1, 0.5, 1.20));
     newmv = mult(newmv, rotateZ(wheelRotation));
     gl.uniformMatrix4fv(umv, false, flatten(newmv));
-    gl.drawArrays(gl.TRIANGLE_FAN, 34, 50);
+    gl.drawArrays(gl.TRIANGLE_FAN, wheelfaceStart, wheelfaceLength);
     newmv = matrix;
     newmv = mult(newmv, translate(-1, 0.5, 1.125));
     newmv = mult(newmv, rotateZ(wheelRotation));
     gl.uniformMatrix4fv(umv, false, flatten(newmv));
-    gl.drawArrays(gl.TRIANGLE_STRIP, 84, 100);
+    gl.drawArrays(gl.TRIANGLE_STRIP, wheelrimStart, wheelrimLength);
 
     // wheel 3
     newmv = matrix;
     newmv = mult(newmv, translate(1, 0.5, -1.20));
     newmv = mult(newmv, rotateZ(wheelRotation));
     gl.uniformMatrix4fv(umv, false, flatten(newmv));
-    gl.drawArrays(gl.TRIANGLE_FAN, 34, 50);
+    gl.drawArrays(gl.TRIANGLE_FAN, wheelfaceStart, wheelfaceLength);
     newmv = matrix;
     newmv = mult(newmv, translate(1, 0.5, -1.125));
     newmv = mult(newmv, rotateZ(wheelRotation));
     gl.uniformMatrix4fv(umv, false, flatten(newmv));
-    gl.drawArrays(gl.TRIANGLE_STRIP, 84, 100);
+    gl.drawArrays(gl.TRIANGLE_STRIP, wheelrimStart, wheelrimLength);
 
     // wheel 4
     newmv = matrix;
     newmv = mult(newmv, translate(-1, 0.5, -1.20));
     newmv = mult(newmv, rotateZ(wheelRotation));
     gl.uniformMatrix4fv(umv, false, flatten(newmv));
-    gl.drawArrays(gl.TRIANGLE_FAN, 34, 50);
+    gl.drawArrays(gl.TRIANGLE_FAN, wheelfaceStart, wheelfaceLength);
     newmv = matrix;
     newmv = mult(newmv, translate(-1, 0.5, -1.125));
     newmv = mult(newmv, rotateZ(wheelRotation));
     gl.uniformMatrix4fv(umv, false, flatten(newmv));
-    gl.drawArrays(gl.TRIANGLE_STRIP, 84, 100);
+    gl.drawArrays(gl.TRIANGLE_STRIP, wheelrimStart, wheelrimLength);
 
     // make the track
     if (fileExists) {
@@ -532,22 +655,14 @@ function render() {
             var matrix = mult(mv, transformMatrix);
             matrix = mult(matrix, rotateX(180));
             gl.uniformMatrix4fv(umv, false, flatten(matrix));
-            gl.drawArrays(gl.TRIANGLES, 184, 36);
+            gl.drawArrays(gl.TRIANGLES, railtieStart, railtieLength);
             // draw the rails
             newmv = mult(matrix, translate(-1, 0, 0, 0));
             gl.uniformMatrix4fv(umv, false, flatten(newmv));
-            gl.drawArrays(gl.TRIANGLES, 220, 24);
+            gl.drawArrays(gl.TRIANGLES, railstart, railLength);
             newmv = mult(matrix, translate(1, 0, 0, 0));
             gl.uniformMatrix4fv(umv, false, flatten(newmv));
-            gl.drawArrays(gl.TRIANGLES, 220, 24);
+            gl.drawArrays(gl.TRIANGLES, railstart, railLength);
         }
     }
-    // Pseudo code for this loop ^
-    // initialize mv
-    // for loop {
-    //     create transformMatrix
-    //     mult(mv, transformMatrix)
-    //     send to Graphics card
-    //     draw
-    // }
 }

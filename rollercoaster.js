@@ -40,6 +40,11 @@ var riderGlassesLength;
 
 var riderRotation;
 
+var lensZoom;
+var dollyZoom;
+var cameraLookAt;
+var camera;
+
 
 window.onload = function init() {
 
@@ -56,7 +61,7 @@ window.onload = function init() {
     uproj = gl.getUniformLocation(program, "projection");
 
     // Initialize global variables
-    carposition = 0;
+    carposition = [0, 0, 0, -1, 0, 0];
     fileExists = false;
     carx = 0;
     cary = 1;
@@ -65,9 +70,12 @@ window.onload = function init() {
     lookaty = 20;
     lookatz = 40;
     riderRotation = 0;
+    lensZoom = 0;
+    dollyZoom = 0;
+    cameraLookAt = 0;
+    camera = 0;
 
     window.addEventListener("keydown", function(event) {
-        console.log(event.key);
         switch (event.key) {
             // "m" makes the car move
             case "m":
@@ -78,12 +86,55 @@ window.onload = function init() {
                 }
                 break;
             case "ArrowLeft": //left
-                riderRotation=riderRotation-5;
-                console.log(riderRotation);
+                if(riderRotation>-60) {
+                    riderRotation=riderRotation-3;
+                }
                 break;
             case "ArrowRight": //right
-                riderRotation=riderRotation+5;
-                console.log(riderRotation);
+                if(riderRotation<60) {
+                    riderRotation=riderRotation+3;
+                }
+                break;
+            case "x": // lens zoom in
+                if(lensZoom<40) {
+                    lensZoom++;
+                }
+                break;
+            case "z": // lens zoom out
+                if(lensZoom>-40) {
+                    lensZoom--;
+                }
+                break;
+            case "r": // reset lens
+                lensZoom = 0;
+                dollyZoom = 0;
+                break;
+            case "q": // dolly in
+                if(dollyZoom<10) {
+                    dollyZoom++;
+                }
+                break;
+            case "e": // dolly out
+                if(dollyZoom>-15) {
+                    dollyZoom--;
+                }
+                break;
+            case "f": // toggle between looking at origin and looking at car
+                if(cameraLookAt === 0) {
+                    cameraLookAt = 1;
+                }
+                else {
+                    cameraLookAt = 0;
+                }
+                break;
+            case "c": // toggle between camera angles (free, perspective, reaction)
+                if(camera === 0) {
+                    camera = 1;
+                } else if(camera === 1) {
+                    camera = 2;
+                } else if(camera === 2) {
+                    camera = 0;
+                }
                 break;
             // various camera angles for testing purposes
             case "0":
@@ -441,15 +492,16 @@ function makeShapes() {
 
     wheelrimLength = shapePoints.length/2 - wheelrimStart;
 
-    generateSphere(15);
+    createRider(15);
 
     bufferShapes();
 }
 
-function generateSphere(subdiv){
+function createRider(subdiv){
 
     var step = (360.0 / subdiv)*(Math.PI / 180.0); //how much do we increase the angles by per triangle?
-
+    
+    // Create rider's head
     riderHeadStart = shapePoints.length/2;
 
     for (var lat = 0; lat <= Math.PI ; lat += step){ //latitude
@@ -474,6 +526,7 @@ function generateSphere(subdiv){
 
     riderHeadLength = shapePoints.length/2 - riderHeadStart;
 
+    // Create rider's glasses
     riderGlassesStart = shapePoints.length/2;
 
     var vertexNum = 50;
@@ -529,13 +582,51 @@ function render() {
     // Clear previous color and buffer
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    //we'll discuss projection matrices in a couple of days, but use this for now:
-    var p = perspective(45.0, canvas.width / canvas.height, 1.0, 100.0);
-    gl.uniformMatrix4fv(uproj, false, flatten(p));
+    // now set up the model view matrix and send it over as a uniform
+    // Roaming camera
+    if(camera === 0) {
 
-    //now set up the model view matrix and send it over as a uniform
-    //the inputs to this lookAt are to move back 20 units, point at the origin, and the positive y axis is up
-    var mv = lookAt(vec3(lookatx, lookaty, lookatz), vec3(0, 0, 0), vec3(0, 1, 0));
+        var p = perspective(45.0+lensZoom, canvas.width / canvas.height, 1.0, 100.0);
+        gl.uniformMatrix4fv(uproj, false, flatten(p));
+
+        if (cameraLookAt === 1 && fileExists) {
+            var mv = lookAt(vec3(lookatx, lookaty - dollyZoom, lookatz - (2 * dollyZoom)), vec3(carposition[carx], carposition[cary], carposition[carz]), vec3(0, 1, 0));
+        } else {
+            var mv = lookAt(vec3(lookatx, lookaty - dollyZoom, lookatz - (2 * dollyZoom)), vec3(0, 0, 0), vec3(0, 1, 0));
+        }
+    // Viewpoint camera
+    } else if(camera === 1) {
+
+        var p = perspective(70, canvas.width / canvas.height, 1.0, 100.0);
+        gl.uniformMatrix4fv(uproj, false, flatten(p));
+
+        var tempUp = normalize(vec3(0, 1, 0));
+        var point = vec3(carposition[carx], carposition[cary], carposition[carz]);
+        var point2 = vec3(carposition[(carx + 3) % (carposition.length)], carposition[(cary + 3) % (carposition.length)], carposition[(carz + 3) % (carposition.length)]);
+        var forward = normalize(subtract(point2, point));
+        var right = normalize(cross(forward, tempUp));
+        var up = normalize(cross(forward, right));
+        var cameraPoint = add(point, scale(-3, up)); // This is the origin of the camera
+        var cameraF = add(add(add(point2, scale(-2.5, up)), scale(6, forward)), scale(riderRotation/6, right)); // This is where the camera is pointing
+
+        var mv = lookAt(cameraPoint, cameraF, vec3(0, 1, 0));
+    // Reaction camera
+    } else {
+
+        var p = perspective(45.0+lensZoom, canvas.width / canvas.height, 1.0, 100.0);
+        gl.uniformMatrix4fv(uproj, false, flatten(p));
+
+        var tempUp = normalize(vec3(0, 1, 0));
+        var point = vec3(carposition[carx], carposition[cary], carposition[carz]);
+        var point2 = vec3(carposition[(carx + 3) % (carposition.length)], carposition[(cary + 3) % (carposition.length)], carposition[(carz + 3) % (carposition.length)]);
+        var forward = normalize(subtract(point2, point));
+        var right = normalize(cross(forward, tempUp));
+        var up = normalize(cross(forward, right));
+        var cameraPoint = add(add(add(point, scale(7, forward)), scale(riderRotation/6, right)), scale(-3, up)); // This is the origin of the camera
+        var cameraF = add(point2, scale(-1, up)); // This is where the camera is pointing
+
+        var mv = lookAt(cameraPoint, cameraF, vec3(0, 1, 0));
+    }
     var newmv = mult(mv, rotateX(90));
 
     gl.uniformMatrix4fv(umv, false, flatten(newmv));
@@ -563,6 +654,7 @@ function render() {
         matrix = mult(matrix, translate(0, -1.5, 0));
         matrix = mult(matrix, rotateY(90));
     } else {
+        // If there isn't a loaded file, give this default transformation matrix
         matrix = mv;
         matrix = mult(matrix, translate(0, 1, 0));
         matrix = mult(matrix, rotateX(180));

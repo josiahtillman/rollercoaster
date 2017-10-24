@@ -95,12 +95,12 @@ window.onload = function init() {
                     riderRotation=riderRotation+3;
                 }
                 break;
-            case "x": // lens zoom in
+            case "z": // lens zoom in
                 if(lensZoom<40) {
                     lensZoom++;
                 }
                 break;
-            case "z": // lens zoom out
+            case "x": // lens zoom out
                 if(lensZoom>-40) {
                     lensZoom--;
                 }

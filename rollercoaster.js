@@ -605,9 +605,9 @@ function render() {
         var point2 = vec3(carposition[(carx + 3) % (carposition.length)], carposition[(cary + 3) % (carposition.length)], carposition[(carz + 3) % (carposition.length)]);
         var forward = normalize(subtract(point2, point));
         var right = normalize(cross(forward, tempUp));
-        var up = normalize(cross(forward, right));
-        var cameraPoint = add(point, scale(-3, up)); // This is the origin of the camera
-        var cameraF = add(add(add(point2, scale(-2.5, up)), scale(6, forward)), scale(riderRotation/6, right)); // This is where the camera is pointing
+        var up = normalize(cross(right, forward));
+        var cameraPoint = add(point, scale(3, up)); // This is the origin of the camera
+        var cameraF = add(add(add(point2, scale(2.5, up)), scale(6, forward)), scale(riderRotation/6, right)); // This is where the camera is pointing
 
         var mv = lookAt(cameraPoint, cameraF, vec3(0, 1, 0));
     // Reaction camera
@@ -621,9 +621,9 @@ function render() {
         var point2 = vec3(carposition[(carx + 3) % (carposition.length)], carposition[(cary + 3) % (carposition.length)], carposition[(carz + 3) % (carposition.length)]);
         var forward = normalize(subtract(point2, point));
         var right = normalize(cross(forward, tempUp));
-        var up = normalize(cross(forward, right));
-        var cameraPoint = add(add(add(point, scale(7, forward)), scale(riderRotation/6, right)), scale(-3, up)); // This is the origin of the camera
-        var cameraF = add(point2, scale(-1, up)); // This is where the camera is pointing
+        var up = normalize(cross(right, forward));
+        var cameraPoint = add(add(add(point, scale(7, forward)), scale(-riderRotation/6, right)), scale(3, up)); // This is the origin of the camera
+        var cameraF = add(point2, scale(1, up)); // This is where the camera is pointing
 
         var mv = lookAt(cameraPoint, cameraF, vec3(0, 1, 0));
     }
@@ -648,38 +648,36 @@ function render() {
         // console.log("next one:" + (carx + 3) % (carposition.length) + (cary + 3) % (carposition.length) + (carz + 3) % (carposition.length));
         var right = vec4(normalize(cross(forward, tempUp)), 0);
         var point = vec4(carposition[carx], carposition[cary], carposition[carz], 1);
-        var up = vec4(normalize(cross(forward, right)), 0);
+        var up = vec4(normalize(cross(right, forward)), 0);
         var transformMatrix = transpose(mat4(right, up, forward, point)); // transpose because mat4 uses rows to make mat4
         var matrix = mult(mv, transformMatrix);
-        matrix = mult(matrix, translate(0, -1.5, 0));
+        matrix = mult(matrix, translate(0, 1.25, 0));
         matrix = mult(matrix, rotateY(90));
     } else {
         // If there isn't a loaded file, give this default transformation matrix
         matrix = mv;
         matrix = mult(matrix, translate(0, 1, 0));
-        matrix = mult(matrix, rotateX(180));
     }
 
     newmv = matrix;
-    newmv = mult(newmv, rotateX(180));
     gl.uniformMatrix4fv(umv, false, flatten(newmv));
     gl.drawArrays(gl.TRIANGLES, carStart, carLength); // draw the car
 
     newmv = matrix;
-    newmv = mult(newmv, translate(0, -1, 0));
+    newmv = mult(newmv, translate(0, 1, 0));
     gl.uniformMatrix4fv(umv, false, flatten(newmv));
     gl.drawArrays(gl.TRIANGLES, riderHeadStart, riderHeadLength); // draw the rider
 
     newmv = matrix;
     newmv = mult(newmv, rotateY(riderRotation));
-    newmv = mult(newmv, translate(-0.6, -1, 0.25));
+    newmv = mult(newmv, translate(-0.6, 1, 0.25));
     newmv = mult(newmv, rotateY(90));
     gl.uniformMatrix4fv(umv, false, flatten(newmv));
     gl.drawArrays(gl.TRIANGLE_FAN, riderGlassesStart, riderGlassesLength); // draw the glasses
 
     newmv = matrix;
     newmv = mult(newmv, rotateY(riderRotation));
-    newmv = mult(newmv, translate(-0.6, -1, -0.25));
+    newmv = mult(newmv, translate(-0.6, 1, -0.25));
     newmv = mult(newmv, rotateY(90));
     gl.uniformMatrix4fv(umv, false, flatten(newmv));
     gl.drawArrays(gl.TRIANGLE_FAN, riderGlassesStart, riderGlassesLength); // draw the glasses
@@ -687,48 +685,48 @@ function render() {
     // wheels
     // wheel 1
     newmv = matrix;
-    newmv = mult(newmv, translate(1, 0.5, 1.20));
+    newmv = mult(newmv, translate(1, -0.5, 1.20));
     newmv = mult(newmv, rotateZ(wheelRotation));
     gl.uniformMatrix4fv(umv, false, flatten(newmv));
     gl.drawArrays(gl.TRIANGLE_FAN, wheelfaceStart, wheelfaceLength);
     newmv = matrix;
-    newmv = mult(newmv, translate(1, 0.5, 1.125));
+    newmv = mult(newmv, translate(1, -0.5, 1.125));
     newmv = mult(newmv, rotateZ(wheelRotation));
     gl.uniformMatrix4fv(umv, false, flatten(newmv));
     gl.drawArrays(gl.TRIANGLE_STRIP, wheelrimStart, wheelrimLength);
 
     // wheel 2
     newmv = matrix;
-    newmv = mult(newmv, translate(-1, 0.5, 1.20));
+    newmv = mult(newmv, translate(-1, -0.5, 1.20));
     newmv = mult(newmv, rotateZ(wheelRotation));
     gl.uniformMatrix4fv(umv, false, flatten(newmv));
     gl.drawArrays(gl.TRIANGLE_FAN, wheelfaceStart, wheelfaceLength);
     newmv = matrix;
-    newmv = mult(newmv, translate(-1, 0.5, 1.125));
+    newmv = mult(newmv, translate(-1, -0.5, 1.125));
     newmv = mult(newmv, rotateZ(wheelRotation));
     gl.uniformMatrix4fv(umv, false, flatten(newmv));
     gl.drawArrays(gl.TRIANGLE_STRIP, wheelrimStart, wheelrimLength);
 
     // wheel 3
     newmv = matrix;
-    newmv = mult(newmv, translate(1, 0.5, -1.20));
+    newmv = mult(newmv, translate(1, -0.5, -1.20));
     newmv = mult(newmv, rotateZ(wheelRotation));
     gl.uniformMatrix4fv(umv, false, flatten(newmv));
     gl.drawArrays(gl.TRIANGLE_FAN, wheelfaceStart, wheelfaceLength);
     newmv = matrix;
-    newmv = mult(newmv, translate(1, 0.5, -1.125));
+    newmv = mult(newmv, translate(1, -0.5, -1.125));
     newmv = mult(newmv, rotateZ(wheelRotation));
     gl.uniformMatrix4fv(umv, false, flatten(newmv));
     gl.drawArrays(gl.TRIANGLE_STRIP, wheelrimStart, wheelrimLength);
 
     // wheel 4
     newmv = matrix;
-    newmv = mult(newmv, translate(-1, 0.5, -1.20));
+    newmv = mult(newmv, translate(-1, -0.5, -1.20));
     newmv = mult(newmv, rotateZ(wheelRotation));
     gl.uniformMatrix4fv(umv, false, flatten(newmv));
     gl.drawArrays(gl.TRIANGLE_FAN, wheelfaceStart, wheelfaceLength);
     newmv = matrix;
-    newmv = mult(newmv, translate(-1, 0.5, -1.125));
+    newmv = mult(newmv, translate(-1, -0.5, -1.125));
     newmv = mult(newmv, rotateZ(wheelRotation));
     gl.uniformMatrix4fv(umv, false, flatten(newmv));
     gl.drawArrays(gl.TRIANGLE_STRIP, wheelrimStart, wheelrimLength);
@@ -741,11 +739,10 @@ function render() {
                 vec4(carposition[i], carposition[i + 1], carposition[i + 2], 1)));
             var right = vec4(normalize(cross(forward, tempUp)), 0);
             var point = vec4(carposition[i], carposition[i + 1], carposition[i + 2], 1);
-            var up = vec4(normalize(cross(forward, right)), 0);
+            var up = vec4(normalize(cross(right, forward)), 0);
             // Lecture 9 slide 11
             var transformMatrix = transpose(mat4(right, up, forward, point)); // transpose because mat4 uses rows to make mat4
             var matrix = mult(mv, transformMatrix);
-            matrix = mult(matrix, rotateX(180));
             gl.uniformMatrix4fv(umv, false, flatten(matrix));
             gl.drawArrays(gl.TRIANGLES, railtieStart, railtieLength);
             // draw the rails

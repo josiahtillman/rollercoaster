@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="0a3a7ab6-37a0-4ae3-be3f-c2c747707a05" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/fshader-lighting.glsl" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/initShaders2.js" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/vshader-lighting.glsl" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/rollercoaster.js" afterPath="$PROJECT_DIR$/rollercoaster.js" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
@@ -32,8 +34,8 @@
       <file leaf-file-name="MV.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/MV.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="8100">
-              <caret line="544" column="9" lean-forward="false" selection-start-line="544" selection-start-column="8" selection-end-line="544" selection-end-column="9" />
+            <state relative-caret-position="292">
+              <caret line="356" column="15" lean-forward="false" selection-start-line="356" selection-start-column="9" selection-end-line="356" selection-end-column="15" />
               <folding>
                 <element signature="n#!!doc" expanded="true" />
               </folding>
@@ -54,11 +56,31 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="rollercoaster.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="rollercoaster.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/rollercoaster.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="379">
-              <caret line="101" column="22" lean-forward="true" selection-start-line="101" selection-start-column="22" selection-end-line="101" selection-end-column="22" />
+            <state relative-caret-position="499">
+              <caret line="621" column="57" lean-forward="true" selection-start-line="621" selection-start-column="57" selection-end-line="621" selection-end-column="57" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="fshader-lighting.glsl" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/fshader-lighting.glsl">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="0">
+              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="initShaders2.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/initShaders2.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="330">
+              <caret line="22" column="24" lean-forward="true" selection-start-line="22" selection-start-column="24" selection-end-line="22" selection-end-column="24" />
               <folding />
             </state>
           </provider>
@@ -84,6 +106,9 @@
       <find>dot</find>
       <find>wheel</find>
       <find>&quot;x&quot;</find>
+      <find>cross</find>
+      <find>180</find>
+      <find>rotate</find>
     </findStrings>
     <replaceStrings>
       <replace>, 0.5*M</replace>
@@ -149,6 +174,11 @@
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="HbShouldOpenHtmlAsHb" value="" />
   </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+    </key>
+  </component>
   <component name="RunDashboard">
     <option name="ruleStates">
       <list>
@@ -187,12 +217,12 @@
       <workItem from="1508208720852" duration="242000" />
       <workItem from="1508719567122" duration="271000" />
       <workItem from="1508800194571" duration="558000" />
-      <workItem from="1508884316877" duration="532000" />
+      <workItem from="1508884316877" duration="4019000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="19503000" />
+    <option name="totallyTimeSpent" value="22990000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1680" height="1023" extended-state="6" />
@@ -538,12 +568,13 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/MV.js">
+    <entry file="file://$PROJECT_DIR$/rollercoaster.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="8100">
-          <caret line="544" column="9" lean-forward="false" selection-start-line="544" selection-start-column="8" selection-end-line="544" selection-end-column="9" />
+        <state relative-caret-position="360">
+          <caret line="24" column="28" lean-forward="true" selection-start-line="24" selection-start-column="28" selection-end-line="24" selection-end-column="28" />
           <folding>
-            <element signature="n#!!doc" expanded="true" />
+            <marker date="1506562864000" expanded="true" signature="362:507" ph="{...}" />
+            <marker date="1506562864000" expanded="true" signature="692:723" ph="{...}" />
           </folding>
         </state>
       </provider>
@@ -558,21 +589,36 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/rollercoaster.html">
+    <entry file="file://$PROJECT_DIR$/MV.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="360">
-          <caret line="24" column="28" lean-forward="true" selection-start-line="24" selection-start-column="28" selection-end-line="24" selection-end-column="28" />
+        <state relative-caret-position="292">
+          <caret line="356" column="15" lean-forward="false" selection-start-line="356" selection-start-column="9" selection-end-line="356" selection-end-column="15" />
           <folding>
-            <marker date="1506562864000" expanded="true" signature="362:507" ph="{...}" />
-            <marker date="1506562864000" expanded="true" signature="692:723" ph="{...}" />
+            <element signature="n#!!doc" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/initShaders2.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="330">
+          <caret line="22" column="24" lean-forward="true" selection-start-line="22" selection-start-column="24" selection-end-line="22" selection-end-column="24" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/rollercoaster.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="379">
-          <caret line="101" column="22" lean-forward="true" selection-start-line="101" selection-start-column="22" selection-end-line="101" selection-end-column="22" />
+        <state relative-caret-position="499">
+          <caret line="621" column="57" lean-forward="true" selection-start-line="621" selection-start-column="57" selection-end-line="621" selection-end-column="57" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/fshader-lighting.glsl">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding />
         </state>
       </provider>

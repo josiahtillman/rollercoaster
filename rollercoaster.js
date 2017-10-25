@@ -54,7 +54,8 @@ window.onload = function init() {
         alert("WebGL isn't available");
     }
 
-    program = initShaders(gl, "vertex-shader", "fragment-shader");
+    // program = initShaders(gl, "vertex-shader", "fragment-shader"); OLD SHADER
+    program = initShaders(gl, "vshader-phong.glsl", "fshader-phong.glsl");
     gl.useProgram(program);
 
     umv = gl.getUniformLocation(program, "model_view");
@@ -85,13 +86,13 @@ window.onload = function init() {
                     moving = true;
                 }
                 break;
-            case "ArrowLeft": //left
-                if(riderRotation>-60) {
+            case "ArrowRight": //right
+                if(riderRotation>-90) {
                     riderRotation=riderRotation-3;
                 }
                 break;
-            case "ArrowRight": //right
-                if(riderRotation<60) {
+            case "ArrowLeft": //left
+                if(riderRotation<90) {
                     riderRotation=riderRotation+3;
                 }
                 break;
@@ -564,7 +565,7 @@ function update() {
         wheelRotation -= 10
         // if it's back at the beginning, set back to 0 1 and 2
         if (fileExists) {
-            if (carx < carposition.length) {
+            if (carx+3 < carposition.length) {
                 carx += 3%(carposition.length);
                 cary += 3%(carposition.length);
                 carz += 3%(carposition.length);
@@ -603,11 +604,12 @@ function render() {
         var tempUp = normalize(vec3(0, 1, 0));
         var point = vec3(carposition[carx], carposition[cary], carposition[carz]);
         var point2 = vec3(carposition[(carx + 3) % (carposition.length)], carposition[(cary + 3) % (carposition.length)], carposition[(carz + 3) % (carposition.length)]);
-        var forward = normalize(subtract(point2, point));
+        var tempforward = normalize(subtract(point2, point));
+        var forward = vec3(mult(rotate(riderRotation, tempUp), vec4(tempforward)));
         var right = normalize(cross(forward, tempUp));
         var up = normalize(cross(right, forward));
         var cameraPoint = add(point, scale(3, up)); // This is the origin of the camera
-        var cameraF = add(add(add(point2, scale(2.5, up)), scale(6, forward)), scale(riderRotation/6, right)); // This is where the camera is pointing
+        var cameraF = add(add(point2, scale(2, up)), scale(6, forward)); // This is where the camera is pointing
 
         var mv = lookAt(cameraPoint, cameraF, vec3(0, 1, 0));
     // Reaction camera
@@ -619,11 +621,12 @@ function render() {
         var tempUp = normalize(vec3(0, 1, 0));
         var point = vec3(carposition[carx], carposition[cary], carposition[carz]);
         var point2 = vec3(carposition[(carx + 3) % (carposition.length)], carposition[(cary + 3) % (carposition.length)], carposition[(carz + 3) % (carposition.length)]);
-        var forward = normalize(subtract(point2, point));
+        var tempforward = normalize(subtract(point2, point));
+        var forward = vec3(mult(rotate(riderRotation, tempUp), vec4(tempforward)));
         var right = normalize(cross(forward, tempUp));
         var up = normalize(cross(right, forward));
-        var cameraPoint = add(add(add(point, scale(7, forward)), scale(-riderRotation/6, right)), scale(3, up)); // This is the origin of the camera
-        var cameraF = add(point2, scale(1, up)); // This is where the camera is pointing
+        var cameraPoint = add(add(point, scale(7, forward)), scale(2, up)); // This is the origin of the camera
+        var cameraF = add(point, scale(2, up)); // This is where the camera is pointing
 
         var mv = lookAt(cameraPoint, cameraF, vec3(0, 1, 0));
     }
@@ -643,9 +646,6 @@ function render() {
         var tempUp = normalize(vec4(0, 1, 0, 0));
         var forward = normalize(subtract(vec4(carposition[(carx + 3) % (carposition.length)], carposition[(cary + 3) % (carposition.length)], carposition[(carz + 3) % (carposition.length)], 1),
             vec4(carposition[carx], carposition[cary], carposition[carz], 1)));
-        // TODO figure out this error thing
-        // console.log("this one: " + carx + cary + carz);
-        // console.log("next one:" + (carx + 3) % (carposition.length) + (cary + 3) % (carposition.length) + (carz + 3) % (carposition.length));
         var right = vec4(normalize(cross(forward, tempUp)), 0);
         var point = vec4(carposition[carx], carposition[cary], carposition[carz], 1);
         var up = vec4(normalize(cross(right, forward)), 0);
@@ -743,6 +743,7 @@ function render() {
             // Lecture 9 slide 11
             var transformMatrix = transpose(mat4(right, up, forward, point)); // transpose because mat4 uses rows to make mat4
             var matrix = mult(mv, transformMatrix);
+            // draw the ties
             gl.uniformMatrix4fv(umv, false, flatten(matrix));
             gl.drawArrays(gl.TRIANGLES, railtieStart, railtieLength);
             // draw the rails

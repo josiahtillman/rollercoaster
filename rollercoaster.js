@@ -45,6 +45,21 @@ var dollyZoom;
 var cameraLookAt;
 var camera;
 
+var red = false;
+var green = false;
+var blue = false;
+var white = false;
+var spotlight = false;
+
+//shader variable indices for per vertex and material attributes
+var vSpecularColor; //highlight color
+var vSpecularExponent;
+
+//uniform indices for light properties
+var light_position;
+var light_color;
+var ambient_light;
+
 
 window.onload = function init() {
 
@@ -60,6 +75,12 @@ window.onload = function init() {
 
     umv = gl.getUniformLocation(program, "model_view");
     uproj = gl.getUniformLocation(program, "projection");
+
+    ambient_light = gl.getUniformLocation(program, "ambient_light");
+    vSpecularColor = gl.getAttribLocation(program, "vSpecularColor");
+    vSpecularExponent = gl.getAttribLocation(program, "vSpecularExponent");
+    light_position = gl.getUniformLocation(program, "light_position");
+    light_color = gl.getUniformLocation(program, "light_color");
 
     // Initialize global variables
     carposition = [0, 0, 0, -1, 0, 0];
@@ -137,6 +158,42 @@ window.onload = function init() {
                     camera = 0;
                 }
                 break;
+            // turn on or off lights (red, green, blue, white and spotlight)
+            case "1":
+                if(red) {
+                    red = false;
+                } else {
+                    red = true;
+                }
+                break;
+            case "2":
+                if(green) {
+                    green = false;
+                } else {
+                    green = true;
+                }
+                break;
+            case "3":
+                if(blue) {
+                    blue = false;
+                } else {
+                    blue = true;
+                }
+                break;
+            case "4":
+                if(white) {
+                    white = false;
+                } else {
+                    white = true;
+                }
+                break;
+            case "5":
+                if(spotlight) {
+                    spotlight = false;
+                } else {
+                    spotlight = true;
+                }
+                break;
             // various camera angles for testing purposes
             case "0":
                 lookatx = 20;
@@ -200,144 +257,213 @@ function parseData(input) {
 
     makeShapes();
 
-    railtieStart = shapePoints.length/2;
+    railtieStart = shapePoints.length/3;
 
     // This is a 3D rail tie
+    // pointing away from us
     shapePoints.push(vec4(1.5, 0.1, 0.1, 1.0));
     shapePoints.push(vec4(0.5, 0.3, 0.1, 1.0)); // brown
+    shapePoints.push(vec4(0, 0, 1.0, 0.0)); // normal
     shapePoints.push(vec4(-1.5, 0.1, 0.1, 1.0));
     shapePoints.push(vec4(0.5, 0.3, 0.1, 1.0)); // brown
+    shapePoints.push(vec4(0, 0, 1.0, 0.0)); // normal
     shapePoints.push(vec4(-1.5, -0.1, 0.1, 1.0));
     shapePoints.push(vec4(0.5, 0.3, 0.1, 1.0)); // brown
+    shapePoints.push(vec4(0, 0, 1.0, 0.0)); // normal
     shapePoints.push(vec4(-1.5, -0.1, 0.1, 1.0));
     shapePoints.push(vec4(0.5, 0.3, 0.1, 1.0)); // brown
+    shapePoints.push(vec4(0, 0, 1.0, 0.0)); // normal
     shapePoints.push(vec4(1.5, -0.1, 0.1, 1.0));
     shapePoints.push(vec4(0.5, 0.3, 0.1, 1.0)); // brown
+    shapePoints.push(vec4(0, 0, 1.0, 0.0)); // normal
     shapePoints.push(vec4(1.5, 0.1, 0.1, 1.0));
     shapePoints.push(vec4(0.5, 0.3, 0.1, 1.0)); // brown
+    shapePoints.push(vec4(0, 0, 1.0, 0.0)); // normal
 
+    // pointing towards us
     shapePoints.push(vec4(1.5, 0.1, -0.1, 1.0));
     shapePoints.push(vec4(0.5, 0.3, 0.1, 1.0)); // brown
+    shapePoints.push(vec4(0, 0, -1.0, 0.0)); // normal
     shapePoints.push(vec4(-1.5, 0.1, -0.1, 1.0));
     shapePoints.push(vec4(0.5, 0.3, 0.1, 1.0)); // brown
+    shapePoints.push(vec4(0, 0, -1.0, 0.0)); // normal
     shapePoints.push(vec4(-1.5, -0.1, -0.1, 1.0));
     shapePoints.push(vec4(0.5, 0.3, 0.1, 1.0)); // brown
+    shapePoints.push(vec4(0, 0, -1.0, 0.0)); // normal
     shapePoints.push(vec4(-1.5, -0.1, -0.1, 1.0));
     shapePoints.push(vec4(0.5, 0.3, 0.1, 1.0)); // brown
+    shapePoints.push(vec4(0, 0, -1.0, 0.0)); // normal
     shapePoints.push(vec4(1.5, -0.1, -0.1, 1.0));
     shapePoints.push(vec4(0.5, 0.3, 0.1, 1.0)); // brown
+    shapePoints.push(vec4(0, 0, -1.0, 0.0)); // normal
     shapePoints.push(vec4(1.5, 0.1, -0.1, 1.0));
     shapePoints.push(vec4(0.5, 0.3, 0.1, 1.0)); // brown
+    shapePoints.push(vec4(0, 0, -1.0, 0.0)); // normal
 
+    // pointing up
     shapePoints.push(vec4(1.5, 0.1, -0.1, 1.0));
     shapePoints.push(vec4(0.5, 0.3, 0.1, 1.0)); // brown
+    shapePoints.push(vec4(0, 1.0, 0, 0.0)); // normal
     shapePoints.push(vec4(-1.5, 0.1, -0.1, 1.0));
     shapePoints.push(vec4(0.5, 0.3, 0.1, 1.0)); // brown
+    shapePoints.push(vec4(0, 1.0, 0, 0.0)); // normal
     shapePoints.push(vec4(1.5, 0.1, 0.1, 1.0));
     shapePoints.push(vec4(0.5, 0.3, 0.1, 1.0)); // brown
+    shapePoints.push(vec4(0, 1.0, 0, 0.0)); // normal
     shapePoints.push(vec4(1.5, 0.1, 0.1, 1.0));
     shapePoints.push(vec4(0.5, 0.3, 0.1, 1.0)); // brown
+    shapePoints.push(vec4(0, 1.0, 0, 0.0)); // normal
     shapePoints.push(vec4(-1.5, 0.1, 0.1, 1.0));
     shapePoints.push(vec4(0.5, 0.3, 0.1, 1.0)); // brown
+    shapePoints.push(vec4(0, 1.0, 0, 0.0)); // normal
     shapePoints.push(vec4(-1.5, 0.1, -0.1, 1.0));
     shapePoints.push(vec4(0.5, 0.3, 0.1, 1.0)); // brown
+    shapePoints.push(vec4(0, 1.0, 0, 0.0)); // normal
 
+    // pointing down
     shapePoints.push(vec4(1.5, -0.1, -0.1, 1.0));
     shapePoints.push(vec4(0.5, 0.3, 0.1, 1.0)); // brown
+    shapePoints.push(vec4(0, -1.0, 0, 0.0)); // normal
     shapePoints.push(vec4(-1.5, -0.1, -0.1, 1.0));
     shapePoints.push(vec4(0.5, 0.3, 0.1, 1.0)); // brown
+    shapePoints.push(vec4(0, -1.0, 0, 0.0)); // normal
     shapePoints.push(vec4(1.5, -0.1, 0.1, 1.0));
     shapePoints.push(vec4(0.5, 0.3, 0.1, 1.0)); // brown
+    shapePoints.push(vec4(0, -1.0, 0, 0.0)); // normal
     shapePoints.push(vec4(1.5, -0.1, 0.1, 1.0));
     shapePoints.push(vec4(0.5, 0.3, 0.1, 1.0)); // brown
+    shapePoints.push(vec4(0, -1.0, 0, 0.0)); // normal
     shapePoints.push(vec4(-1.5, -0.1, 0.1, 1.0));
     shapePoints.push(vec4(0.5, 0.3, 0.1, 1.0)); // brown
+    shapePoints.push(vec4(0, -1.0, 0, 0.0)); // normal
     shapePoints.push(vec4(-1.5, -0.1, -0.1, 1.0));
     shapePoints.push(vec4(0.5, 0.3, 0.1, 1.0)); // brown
+    shapePoints.push(vec4(0, -1.0, 0, 0.0)); // normal
 
+    // pointing right
     shapePoints.push(vec4(1.5, 0.1, 0.1, 1.0));
     shapePoints.push(vec4(0.5, 0.3, 0.1, 1.0)); // brown
+    shapePoints.push(vec4(1.0, 0, 0, 0.0)); // normal
     shapePoints.push(vec4(1.5, -0.1, 0.1, 1.0));
     shapePoints.push(vec4(0.5, 0.3, 0.1, 1.0)); // brown
+    shapePoints.push(vec4(1.0, 0, 0, 0.0)); // normal
     shapePoints.push(vec4(1.5, -0.1, -0.1, 1.0));
     shapePoints.push(vec4(0.5, 0.3, 0.1, 1.0)); // brown
+    shapePoints.push(vec4(1.0, 0, 0, 0.0)); // normal
     shapePoints.push(vec4(1.5, -0.1, -0.1, 1.0));
     shapePoints.push(vec4(0.5, 0.3, 0.1, 1.0)); // brown
+    shapePoints.push(vec4(1.0, 0, 0, 0.0)); // normal
     shapePoints.push(vec4(1.5, 0.1, -0.1, 1.0));
     shapePoints.push(vec4(0.5, 0.3, 0.1, 1.0)); // brown
+    shapePoints.push(vec4(1.0, 0, 0, 0.0)); // normal
     shapePoints.push(vec4(1.5, 0.1, 0.1, 1.0));
     shapePoints.push(vec4(0.5, 0.3, 0.1, 1.0)); // brown
+    shapePoints.push(vec4(1.0, 0, 0, 0.0)); // normal
 
     shapePoints.push(vec4(-1.5, 0.1, 0.1, 1.0));
     shapePoints.push(vec4(0.5, 0.3, 0.1, 1.0)); // brown
+    shapePoints.push(vec4(-1.0, 0, 0, 0.0)); // normal
     shapePoints.push(vec4(-1.5, -0.1, 0.1, 1.0));
     shapePoints.push(vec4(0.5, 0.3, 0.1, 1.0)); // brown
+    shapePoints.push(vec4(-1.0, 0, 0, 0.0)); // normal
     shapePoints.push(vec4(-1.5, -0.1, -0.1, 1.0));
     shapePoints.push(vec4(0.5, 0.3, 0.1, 1.0)); // brown
+    shapePoints.push(vec4(-1.0, 0, 0, 0.0)); // normal
     shapePoints.push(vec4(-1.5, -0.1, -0.1, 1.0));
     shapePoints.push(vec4(0.5, 0.3, 0.1, 1.0)); // brown
+    shapePoints.push(vec4(-1.0, 0, 0, 0.0)); // normal
     shapePoints.push(vec4(-1.5, 0.1, -0.1, 1.0));
     shapePoints.push(vec4(0.5, 0.3, 0.1, 1.0)); // brown
+    shapePoints.push(vec4(-1.0, 0, 0, 0.0)); // normal
     shapePoints.push(vec4(-1.5, 0.1, 0.1, 1.0));
     shapePoints.push(vec4(0.5, 0.3, 0.1, 1.0)); // brown
+    shapePoints.push(vec4(-1.0, 0, 0, 0.0)); // normal
 
-    railtieLength = shapePoints.length/2 - railtieStart;
-    railstart = shapePoints.length/2;
+    railtieLength = shapePoints.length/3 - railtieStart;
+    railstart = shapePoints.length/3;
 
     // The rails
+    // pointing down
     shapePoints.push(vec4(-0.1, 0.2, 0, 1.0));
     shapePoints.push(vec4(0.0, 0.0, 0.0, 1.0)); // black
+    shapePoints.push(vec4(0, -1.0, 0, 0.0)); // normal
     shapePoints.push(vec4(-0.1, 0.2, 0.8, 1.0));
     shapePoints.push(vec4(0.0, 0.0, 0.0, 1.0)); // black
+    shapePoints.push(vec4(0, -1.0, 0, 0.0)); // normal
     shapePoints.push(vec4(0.1, 0.2, 0.8, 1.0));
     shapePoints.push(vec4(0.0, 0.0, 0.0, 1.0)); // black
+    shapePoints.push(vec4(0, -1.0, 0, 0.0)); // normal
     shapePoints.push(vec4(0.1, 0.2, 0.8, 1.0));
     shapePoints.push(vec4(0.0, 0.0, 0.0, 1.0)); // black
+    shapePoints.push(vec4(0, -1.0, 0, 0.0)); // normal
     shapePoints.push(vec4(0.1, 0.2, 0, 1.0));
     shapePoints.push(vec4(0.0, 0.0, 0.0, 1.0)); // black
+    shapePoints.push(vec4(0, -1.0, 0, 0.0)); // normal
     shapePoints.push(vec4(-0.1, 0.2, 0, 1.0));
     shapePoints.push(vec4(0.0, 0.0, 0.0, 1.0)); // black
+    shapePoints.push(vec4(0, -1.0, 0, 0.0)); // normal
 
+    // pointing up
     shapePoints.push(vec4(-0.1, 0.4, 0, 1.0));
     shapePoints.push(vec4(0.0, 0.0, 0.0, 1.0)); // black
+    shapePoints.push(vec4(0, 1.0, 0, 0.0)); // normal
     shapePoints.push(vec4(-0.1, 0.4, 0.8, 1.0));
     shapePoints.push(vec4(0.0, 0.0, 0.0, 1.0)); // black
+    shapePoints.push(vec4(0, 1.0, 0, 0.0)); // normal
     shapePoints.push(vec4(0.1, 0.4, 0.8, 1.0));
     shapePoints.push(vec4(0.0, 0.0, 0.0, 1.0)); // black
+    shapePoints.push(vec4(0, 1.0, 0, 0.0)); // normal
     shapePoints.push(vec4(0.1, 0.4, 0.8, 1.0));
     shapePoints.push(vec4(0.0, 0.0, 0.0, 1.0)); // black
+    shapePoints.push(vec4(0, 1.0, 0, 0.0)); // normal
     shapePoints.push(vec4(0.1, 0.4, 0, 1.0));
     shapePoints.push(vec4(0.0, 0.0, 0.0, 1.0)); // black
+    shapePoints.push(vec4(0, 1.0, 0, 0.0)); // normal
     shapePoints.push(vec4(-0.1, 0.4, 0, 1.0));
     shapePoints.push(vec4(0.0, 0.0, 0.0, 1.0)); // black
+    shapePoints.push(vec4(0, 1.0, 0, 0.0)); // normal
 
+    // pointing left
     shapePoints.push(vec4(-0.1, 0.4, 0, 1.0));
     shapePoints.push(vec4(0.0, 0.0, 0.0, 1.0)); // black
+    shapePoints.push(vec4(-1.0, 0, 0, 0.0)); // normal
     shapePoints.push(vec4(-0.1, 0.4, 0.8, 1.0));
     shapePoints.push(vec4(0.0, 0.0, 0.0, 1.0)); // black
+    shapePoints.push(vec4(-1.0, 0, 0, 0.0)); // normal
     shapePoints.push(vec4(-0.1, 0.2, 0.8, 1.0));
     shapePoints.push(vec4(0.0, 0.0, 0.0, 1.0)); // black
+    shapePoints.push(vec4(-1.0, 0, 0, 0.0)); // normal
     shapePoints.push(vec4(-0.1, 0.2, 0.8, 1.0));
     shapePoints.push(vec4(0.0, 0.0, 0.0, 1.0)); // black
+    shapePoints.push(vec4(-1.0, 0, 0, 0.0)); // normal
     shapePoints.push(vec4(-0.1, 0.4, 0, 1.0));
     shapePoints.push(vec4(0.0, 0.0, 0.0, 1.0)); // black
+    shapePoints.push(vec4(-1.0, 0, 0, 0.0)); // normal
     shapePoints.push(vec4(-0.1, 0.2, 0, 1.0));
     shapePoints.push(vec4(0.0, 0.0, 0.0, 1.0)); // black
+    shapePoints.push(vec4(-1.0, 0, 0, 0.0)); // normal
 
+    // pointing right
     shapePoints.push(vec4(0.1, 0.4, 0, 1.0));
     shapePoints.push(vec4(0.0, 0.0, 0.0, 1.0)); // black
+    shapePoints.push(vec4(1.0, 0, 0, 0.0)); // normal
     shapePoints.push(vec4(0.1, 0.4, 0.8, 1.0));
     shapePoints.push(vec4(0.0, 0.0, 0.0, 1.0)); // black
+    shapePoints.push(vec4(1.0, 0, 0, 0.0)); // normal
     shapePoints.push(vec4(0.1, 0.2, 0.8, 1.0));
     shapePoints.push(vec4(0.0, 0.0, 0.0, 1.0)); // black
+    shapePoints.push(vec4(1.0, 0, 0, 0.0)); // normal
     shapePoints.push(vec4(0.1, 0.2, 0.8, 1.0));
     shapePoints.push(vec4(0.0, 0.0, 0.0, 1.0)); // black
+    shapePoints.push(vec4(1.0, 0, 0, 0.0)); // normal
     shapePoints.push(vec4(0.1, 0.4, 0, 1.0));
     shapePoints.push(vec4(0.0, 0.0, 0.0, 1.0)); // black
+    shapePoints.push(vec4(1.0, 0, 0, 0.0)); // normal
     shapePoints.push(vec4(0.1, 0.2, 0, 1.0));
     shapePoints.push(vec4(0.0, 0.0, 0.0, 1.0)); // black
+    shapePoints.push(vec4(1.0, 0, 0, 0.0)); // normal
 
-    railLength = shapePoints.length/2 - railstart;
+    railLength = shapePoints.length/3 - railstart;
 
     carposition = input.split(/\s+/); //split on white space
 
@@ -355,102 +481,142 @@ function makeShapes() {
 
     // The ground
     shapePoints.push(vec4(20, -20, 0.0, 1.0));
-    shapePoints.push(vec4(0.0, 1.0, 0.0, 1.0)); //green
+    shapePoints.push(vec4(1.0, 1.0, 1.0, 1.0)); //green
+    shapePoints.push(vec4(0, 0, -1.0, 0.0)); //normal
     shapePoints.push(vec4(20, 20, 0.0, 1.0));
-    shapePoints.push(vec4(0.0, 1.0, 0.0, 1.0)); //green
+    shapePoints.push(vec4(1.0, 1.0, 1.0, 1.0)); //green
+    shapePoints.push(vec4(0, 0, -1.0, 0.0)); //normal
     shapePoints.push(vec4(-20, 20, 0.0, 1.0));
-    shapePoints.push(vec4(0.0, 1.0, 0.0, 1.0)); //green
+    shapePoints.push(vec4(1.0, 1.0, 1.0, 1.0)); //green
+    shapePoints.push(vec4(0, 0, -1.0, 0.0)); //normal
     shapePoints.push(vec4(-20, -20, 0.0, 1.0));
-    shapePoints.push(vec4(0.0, 1.0, 0.0, 1.0)); //green
+    shapePoints.push(vec4(1.0, 1.0, 1.0, 1.0)); //green
+    shapePoints.push(vec4(0, 0, -1.0, 0.0)); //normal
 
-    carStart = shapePoints.length/2;
+    carStart = shapePoints.length/3;
 
     // The car
-    // red side
+    // red side (towards us)
     shapePoints.push(vec4(1.5, -0.5, -1.0, 1.0));
     shapePoints.push(vec4(1.0, 0.0, 0.0, 1.0)); //color
+    shapePoints.push(vec4(0, 0, -1.0, 0.0)); //normal
     shapePoints.push(vec4(1.5, 0.5, -1.0, 1.0));
     shapePoints.push(vec4(1.0, 0.0, 0.0, 1.0)); //color
+    shapePoints.push(vec4(0, 0, -1.0, 0.0)); //normal
     shapePoints.push(vec4(-1.5, 0.5, -1.0, 1.0));
     shapePoints.push(vec4(1.0, 0.0, 0.0, 1.0)); //color
+    shapePoints.push(vec4(0, 0, -1.0, 0.0)); //normal
     shapePoints.push(vec4(1.5, -0.5, -1.0, 1.0));
     shapePoints.push(vec4(1.0, 0.0, 0.0, 1.0)); //color
+    shapePoints.push(vec4(0, 0, -1.0, 0.0)); //normal
     shapePoints.push(vec4(-1.5, -0.5, -1.0, 1.0));
     shapePoints.push(vec4(1.0, 0.0, 0.0, 1.0)); //color
+    shapePoints.push(vec4(0, 0, -1.0, 0.0)); //normal
     shapePoints.push(vec4(-1.5, 0.5, -1.0, 1.0));
     shapePoints.push(vec4(1.0, 0.0, 0.0, 1.0)); //color
+    shapePoints.push(vec4(0, 0, -1.0, 0.0)); //normal
 
-    // blue side
+    // blue side (away from us)
     shapePoints.push(vec4(1.5, -0.5, 1.0, 1.0));
     shapePoints.push(vec4(0.0, 0.0, 1.0, 1.0)); //color
+    shapePoints.push(vec4(0, 0, 1.0, 0.0)); //normal
     shapePoints.push(vec4(1.5, 0.5, 1.0, 1.0));
     shapePoints.push(vec4(0.0, 0.0, 1.0, 1.0)); //color
+    shapePoints.push(vec4(0, 0, 1.0, 0.0)); //normal
     shapePoints.push(vec4(-1.5, 0.5, 1.0, 1.0));
     shapePoints.push(vec4(0.0, 0.0, 1.0, 1.0)); //color
+    shapePoints.push(vec4(0, 0, 1.0, 0.0)); //normal
     shapePoints.push(vec4(1.5, -0.5, 1.0, 1.0));
     shapePoints.push(vec4(0.0, 0.0, 1.0, 1.0)); //color
+    shapePoints.push(vec4(0, 0, 1.0, 0.0)); //normal
     shapePoints.push(vec4(-1.5, -0.5, 1.0, 1.0));
     shapePoints.push(vec4(0.0, 0.0, 1.0, 1.0)); //color
+    shapePoints.push(vec4(0, 0, 1.0, 0.0)); //normal
     shapePoints.push(vec4(-1.5, 0.5, 1.0, 1.0));
     shapePoints.push(vec4(0.0, 0.0, 1.0, 1.0)); //color
+    shapePoints.push(vec4(0, 0, 1.0, 0.0)); //normal
 
-    // magenta side
+    // magenta side (to the right)
     shapePoints.push(vec4(1.5, -0.5, 1.0, 1.0));
     shapePoints.push(vec4(1.0, 0.0, 1.0, 1.0)); //color
+    shapePoints.push(vec4(1.0, 0, 0, 0.0)); //normal
     shapePoints.push(vec4(1.5, 0.5, 1.0, 1.0));
     shapePoints.push(vec4(1.0, 0.0, 1.0, 1.0)); //color
+    shapePoints.push(vec4(1.0, 0, 0, 0.0)); //normal
     shapePoints.push(vec4(1.5, 0.5, -1.0, 1.0));
     shapePoints.push(vec4(1.0, 0.0, 1.0, 1.0)); //color
+    shapePoints.push(vec4(1.0, 0, 0, 0.0)); //normal
     shapePoints.push(vec4(1.5, -0.5, 1.0, 1.0));
     shapePoints.push(vec4(1.0, 0.0, 1.0, 1.0)); //color
+    shapePoints.push(vec4(1.0, 0, 0, 0.0)); //normal
     shapePoints.push(vec4(1.5, -0.5, -1.0, 1.0));
     shapePoints.push(vec4(1.0, 0.0, 1.0, 1.0)); //color
+    shapePoints.push(vec4(1.0, 0, 0, 0.0)); //normal
     shapePoints.push(vec4(1.5, 0.5, -1.0, 1.0));
     shapePoints.push(vec4(1.0, 0.0, 1.0, 1.0)); //color
+    shapePoints.push(vec4(1.0, 0, 0, 0.0)); //normal
 
-    // cyan side
+    // cyan side (to the left)
     shapePoints.push(vec4(-1.5, -0.5, 1.0, 1.0));
     shapePoints.push(vec4(0.0, 1.0, 1.0, 1.0)); //color
+    shapePoints.push(vec4(-1.0, 0, 0, 0.0)); //normal
     shapePoints.push(vec4(-1.5, 0.5, 1.0, 1.0));
     shapePoints.push(vec4(0.0, 1.0, 1.0, 1.0)); //color
+    shapePoints.push(vec4(-1.0, 0, 0, 0.0)); //normal
     shapePoints.push(vec4(-1.5, 0.5, -1.0, 1.0));
     shapePoints.push(vec4(0.0, 1.0, 1.0, 1.0)); //color
+    shapePoints.push(vec4(-1.0, 0, 0, 0.0)); //normal
     shapePoints.push(vec4(-1.5, -0.5, 1.0, 1.0));
     shapePoints.push(vec4(0.0, 1.0, 1.0, 1.0)); //color
+    shapePoints.push(vec4(-1.0, 0, 0, 0.0)); //normal
     shapePoints.push(vec4(-1.5, -0.5, -1.0, 1.0));
     shapePoints.push(vec4(0.0, 1.0, 1.0, 1.0)); //color
+    shapePoints.push(vec4(-1.0, 0, 0, 0.0)); //normal
     shapePoints.push(vec4(-1.5, 0.5, -1.0, 1.0));
     shapePoints.push(vec4(0.0, 1.0, 1.0, 1.0)); //color
+    shapePoints.push(vec4(-1.0, 0, 0, 0.0)); //normal
 
-    // yellow side
+    // yellow side (pointing down)
     shapePoints.push(vec4(1.5, -0.5, -1.0, 1.0));
     shapePoints.push(vec4(1.0, 1.0, 0.0, 1.0)); //color
+    shapePoints.push(vec4(0, -1.0, 0, 0.0)); //normal
     shapePoints.push(vec4(1.5, -0.5, 1.0, 1.0));
     shapePoints.push(vec4(1.0, 1.0, 0.0, 1.0)); //color
+    shapePoints.push(vec4(0, -1.0, 0, 0.0)); //normal
     shapePoints.push(vec4(-1.5, -0.5, -1.0, 1.0));
     shapePoints.push(vec4(1.0, 1.0, 0.0, 1.0)); //color
+    shapePoints.push(vec4(0, -1.0, 0, 0.0)); //normal
     shapePoints.push(vec4(1.5, -0.5, 1.0, 1.0));
     shapePoints.push(vec4(1.0, 1.0, 0.0, 1.0)); //color
+    shapePoints.push(vec4(0, -1.0, 0, 0.0)); //normal
     shapePoints.push(vec4(-1.5, -0.5, -1.0, 1.0));
     shapePoints.push(vec4(1.0, 1.0, 0.0, 1.0)); //color
+    shapePoints.push(vec4(0, -1.0, 0, 0.0)); //normal
     shapePoints.push(vec4(-1.5, -0.5, 1.0, 1.0));
     shapePoints.push(vec4(1.0, 1.0, 0.0, 1.0)); //color
+    shapePoints.push(vec4(0, -1.0, 0, 0.0)); //normal
 
-    // top yellow side
+    // top yellow side (pointing up)
     shapePoints.push(vec4(1.5, 0.5, -1.0, 1.0));
     shapePoints.push(vec4(1.0, 1.0, 0.0, 1.0)); //color
+    shapePoints.push(vec4(0, 1.0, 0, 0.0)); //normal
     shapePoints.push(vec4(1.5, 0.5, 1.0, 1.0));
     shapePoints.push(vec4(1.0, 1.0, 0.0, 1.0)); //color
+    shapePoints.push(vec4(0, 1.0, 0, 0.0)); //normal
     shapePoints.push(vec4(-1.5, 0.5, -1.0, 1.0));
     shapePoints.push(vec4(1.0, 1.0, 0.0, 1.0)); //color
+    shapePoints.push(vec4(0, 1.0, 0, 0.0)); //normal
     shapePoints.push(vec4(1.5, 0.5, 1.0, 1.0));
     shapePoints.push(vec4(1.0, 1.0, 0.0, 1.0)); //color
+    shapePoints.push(vec4(0, 1.0, 0, 0.0)); //normal
     shapePoints.push(vec4(-1.5, 0.5, -1.0, 1.0));
     shapePoints.push(vec4(1.0, 1.0, 0.0, 1.0)); //color
+    shapePoints.push(vec4(0, 1.0, 0, 0.0)); //normal
     shapePoints.push(vec4(-1.5, 0.5, 1.0, 1.0));
     shapePoints.push(vec4(1.0, 1.0, 0.0, 1.0)); //color
+    shapePoints.push(vec4(0, 1.0, 0, 0.0)); //normal
 
-    carLength = shapePoints.length/2 - carStart;
+    carLength = shapePoints.length/3 - carStart;
 
     // TODO use define statements to give names to the indices
     // TODO use a seperate file with the indices for different objects (mesh)?
@@ -460,7 +626,7 @@ function makeShapes() {
     moving = false;
     wheelRotation = 0;
 
-    wheelfaceStart = shapePoints.length/2;
+    wheelfaceStart = shapePoints.length/3;
 
     for (var i = 0; i < vertexNum; i++) {
         var percent = i / (vertexNum - 1);
@@ -474,10 +640,11 @@ function makeShapes() {
         } else {
             shapePoints.push(vec4(0.0, 0.0, 0.0, 1.0));
         }
+        shapePoints.push(normalize(vec4(x, y, 0, 0.0))); //normal
     }
 
-    wheelfaceLength = shapePoints.length/2 - wheelfaceStart;
-    wheelrimStart = shapePoints.length/2;
+    wheelfaceLength = shapePoints.length/3 - wheelfaceStart;
+    wheelrimStart = shapePoints.length/3;
 
     // wheel rim
     for (var i = 0; i < vertexNum; i++) {
@@ -487,11 +654,13 @@ function makeShapes() {
         var y = 0.5 * Math.sin(radians);
         shapePoints.push(vec4(x, y, -0.125, 1.0));
         shapePoints.push(vec4(0.0, 0.0, 0.0, 1.0));
+        shapePoints.push(normalize(vec4(x, y, 0, 0.0))); //normal
         shapePoints.push(vec4(x, y, 0.125, 1.0));
         shapePoints.push(vec4(0.0, 0.0, 0.0, 1.0));
+        shapePoints.push(normalize(vec4(x, y, 0, 0.0))); //normal
     }
 
-    wheelrimLength = shapePoints.length/2 - wheelrimStart;
+    wheelrimLength = shapePoints.length/3 - wheelrimStart;
 
     createRider(15);
 
@@ -503,32 +672,38 @@ function createRider(subdiv){
     var step = (360.0 / subdiv)*(Math.PI / 180.0); //how much do we increase the angles by per triangle?
     
     // Create rider's head
-    riderHeadStart = shapePoints.length/2;
+    riderHeadStart = shapePoints.length/3;
 
     for (var lat = 0; lat <= Math.PI ; lat += step){ //latitude
         for (var lon = 0; lon + step <= 2*Math.PI; lon += step){ //longitude
             //triangle 1
             shapePoints.push(vec4(0.6*Math.sin(lat)*Math.cos(lon), 0.6*Math.sin(lon)*Math.sin(lat), 0.6*Math.cos(lat), 1.0)); //position
+            shapePoints.push(vec4(1.0, 1.0, 1.0, 1.0));
             shapePoints.push(vec4(0.6*Math.sin(lat)*Math.cos(lon), 0.6*Math.sin(lon)*Math.sin(lat), 0.6*Math.cos(lat), 0.0)); //normal
             shapePoints.push(vec4(0.6*Math.sin(lat)*Math.cos(lon+step), 0.6*Math.sin(lat)*Math.sin(lon+step), 0.6*Math.cos(lat), 1.0)); //position
+            shapePoints.push(vec4(1.0, 1.0, 1.0, 1.0));
             shapePoints.push(vec4(0.6*Math.sin(lat)*Math.cos(lon+step), 0.6*Math.sin(lat)*Math.sin(lon+step), 0.6*Math.cos(lat), 0.0)); //normal
             shapePoints.push(vec4(0.6*Math.sin(lat+step)*Math.cos(lon+step), 0.6*Math.sin(lon+step)*Math.sin(lat+step), 0.6*Math.cos(lat+step), 1.0)); //etc
+            shapePoints.push(vec4(1.0, 1.0, 1.0, 1.0));
             shapePoints.push(vec4(0.6*Math.sin(lat+step)*Math.cos(lon+step), 0.6*Math.sin(lon+step)*Math.sin(lat+step), 0.6*Math.cos(lat+step), 0.0));
 
             //triangle 2
             shapePoints.push(vec4(0.6*Math.sin(lat+step)*Math.cos(lon+step), 0.6*Math.sin(lon+step)*Math.sin(lat+step), 0.6*Math.cos(lat+step), 1.0));
+            shapePoints.push(vec4(1.0, 1.0, 1.0, 1.0));
             shapePoints.push(vec4(0.6*Math.sin(lat+step)*Math.cos(lon+step), 0.6*Math.sin(lon+step)*Math.sin(lat+step), 0.6*Math.cos(lat+step), 0.0));
             shapePoints.push(vec4(0.6*Math.sin(lat+step)*Math.cos(lon), 0.6*Math.sin(lat+step)*Math.sin(lon), 0.6*Math.cos(lat+step), 1.0));
+            shapePoints.push(vec4(1.0, 1.0, 1.0, 1.0));
             shapePoints.push(vec4(0.6*Math.sin(lat+step)*Math.cos(lon), 0.6*Math.sin(lat+step)*Math.sin(lon), 0.6*Math.cos(lat+step),0.0));
             shapePoints.push(vec4(0.6*Math.sin(lat)*Math.cos(lon), 0.6*Math.sin(lon)*Math.sin(lat), 0.6*Math.cos(lat), 1.0));
+            shapePoints.push(vec4(1.0, 1.0, 1.0, 1.0));
             shapePoints.push(vec4(0.6*Math.sin(lat)*Math.cos(lon), 0.6*Math.sin(lon)*Math.sin(lat), 0.6*Math.cos(lat), 0.0));
         }
     }
 
-    riderHeadLength = shapePoints.length/2 - riderHeadStart;
+    riderHeadLength = shapePoints.length/3 - riderHeadStart;
 
     // Create rider's glasses
-    riderGlassesStart = shapePoints.length/2;
+    riderGlassesStart = shapePoints.length/3;
 
     var vertexNum = 50;
     for (var i = 0; i < vertexNum; i++) {
@@ -538,9 +713,10 @@ function createRider(subdiv){
         var y = 0.2 * Math.sin(radians);
         shapePoints.push(vec4(x, y, 0, 1.0));
         shapePoints.push(vec4(0.0, 0.0, 0.0, 1.0));
+        shapePoints.push(normalize(vec4(x, y, 0, 0.0))); //normal
     }
 
-    riderGlassesLength = shapePoints.length/2 - riderGlassesStart;
+    riderGlassesLength = shapePoints.length/3 - riderGlassesStart;
 }
 
 // Simple buffer method
@@ -550,14 +726,16 @@ function bufferShapes() {
     gl.bufferData(gl.ARRAY_BUFFER, flatten(shapePoints), gl.STATIC_DRAW);
 
     var vPosition = gl.getAttribLocation(program, "vPosition");
-
-    gl.vertexAttribPointer(vPosition, 4, gl.FLOAT, false, 32, 0);
+    gl.vertexAttribPointer(vPosition, 4, gl.FLOAT, false, 48, 0);
     gl.enableVertexAttribArray(vPosition);
 
     var vColor = gl.getAttribLocation(program, "vColor");
-
-    gl.vertexAttribPointer(vColor, 4, gl.FLOAT, false, 32, 16);
+    gl.vertexAttribPointer(vColor, 4, gl.FLOAT, false, 48, 16);
     gl.enableVertexAttribArray(vColor);
+
+    var vNormal = gl.getAttribLocation(program, "vNormal");
+    gl.vertexAttribPointer(vNormal, 4, gl.FLOAT, false, 48, 32);
+    gl.enableVertexAttribArray(vNormal);
 }
 
 function update() {
@@ -632,13 +810,20 @@ function render() {
     }
     var newmv = mult(mv, rotateX(90));
 
-    gl.uniformMatrix4fv(umv, false, flatten(newmv));
+    // Create the light attributes and uniforms
+    gl.uniform4fv(ambient_light, vec4(.1, .1, .1, 1)); // every spot is getting at least this much light
+    gl.vertexAttrib4fv(vSpecularColor, vec4(1.0, 1.0, 1.0, 1.0)); // specular highlight will reflect everything
+    gl.vertexAttrib1f(vSpecularExponent, 30.0); // 30% shiny
+    gl.uniform4fv(light_position, mult(mv, vec4(20, 15, 20, 1))); // This is the position of the xyzw of the light
+    // multiply it by mv so it can be in eyespace
+    gl.uniform4fv(light_color, vec4(1.0, 0, 0, 1)); // a 100% light, (BRIGHT)
 
     //we only have one object at the moment, but just so we don't forget this step later...
     gl.bindBuffer(gl.ARRAY_BUFFER, bufferId);
     //draw the geometry we previously sent over.  It's a list of 12 triangle(s),
     //we want to start at index 0, and there will be a total of 36 vertices (6 faces with 6 vertices each)
 
+    gl.uniformMatrix4fv(umv, false, flatten(newmv));
     gl.drawArrays(gl.TRIANGLE_FAN, 0, 4); // draw the ground
 
     // Create the transform matrix
@@ -658,6 +843,11 @@ function render() {
         matrix = mv;
         matrix = mult(matrix, translate(0, 1, 0));
     }
+
+    newmv = mv;
+    newmv = mult(newmv, translate(20, 15, 20));
+    gl.uniformMatrix4fv(umv, false, flatten(newmv));
+    gl.drawArrays(gl.TRIANGLES, riderHeadStart, riderHeadLength); // draw the red light
 
     newmv = matrix;
     gl.uniformMatrix4fv(umv, false, flatten(newmv));

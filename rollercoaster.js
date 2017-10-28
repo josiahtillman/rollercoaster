@@ -814,9 +814,23 @@ function render() {
     gl.uniform4fv(ambient_light, vec4(.1, .1, .1, 1)); // every spot is getting at least this much light
     gl.vertexAttrib4fv(vSpecularColor, vec4(1.0, 1.0, 1.0, 1.0)); // specular highlight will reflect everything
     gl.vertexAttrib1f(vSpecularExponent, 30.0); // 30% shiny
-    gl.uniform4fv(light_position, mult(mv, vec4(20, 15, 20, 1))); // This is the position of the xyzw of the light
+
+    var lightPosition = [];
+    var lightColor = [];
+    if(red) {
+        lightPosition.push(mult(mv, vec4(20, 15, 20, 1)));
+        lightColor.push(vec4(1.0, 0, 0, 1));
+    } else {
+        lightPosition.push(mult(mv, vec4(20, 15, 20, 1)));
+        lightColor.push(vec4(0.0, 0, 0, 1));
+    }
+
+    lightPosition = flatten(lightPosition);
+    lightColor = flatten(lightColor);
+
+    gl.uniform4fv(light_position, lightPosition); // This is the position of the xyzw of the light
     // multiply it by mv so it can be in eyespace
-    gl.uniform4fv(light_color, vec4(1.0, 0, 0, 1)); // a 100% light, (BRIGHT)
+    gl.uniform4fv(light_color, lightColor); // a 100% light, (BRIGHT)
 
     //we only have one object at the moment, but just so we don't forget this step later...
     gl.bindBuffer(gl.ARRAY_BUFFER, bufferId);
@@ -846,6 +860,21 @@ function render() {
 
     newmv = mv;
     newmv = mult(newmv, translate(20, 15, 20));
+    gl.uniformMatrix4fv(umv, false, flatten(newmv));
+    gl.drawArrays(gl.TRIANGLES, riderHeadStart, riderHeadLength); // draw the red light
+
+    newmv = mv;
+    newmv = mult(newmv, translate(-20, 15, 20));
+    gl.uniformMatrix4fv(umv, false, flatten(newmv));
+    gl.drawArrays(gl.TRIANGLES, riderHeadStart, riderHeadLength); // draw the red light
+
+    newmv = mv;
+    newmv = mult(newmv, translate(-20, 15, -20));
+    gl.uniformMatrix4fv(umv, false, flatten(newmv));
+    gl.drawArrays(gl.TRIANGLES, riderHeadStart, riderHeadLength); // draw the red light
+
+    newmv = mv;
+    newmv = mult(newmv, translate(20, 15, -20));
     gl.uniformMatrix4fv(umv, false, flatten(newmv));
     gl.drawArrays(gl.TRIANGLES, riderHeadStart, riderHeadLength); // draw the red light
 

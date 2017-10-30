@@ -45,11 +45,11 @@ var dollyZoom;
 var cameraLookAt;
 var camera;
 
-var red = false;
-var green = false;
-var blue = false;
-var white = false;
-var spotlight = false;
+var red;
+var green;
+var blue;
+var white;
+var spotlight;
 
 //shader variable indices for per vertex and material attributes
 var vSpecularColor; //highlight color
@@ -96,6 +96,12 @@ window.onload = function init() {
     dollyZoom = 0;
     cameraLookAt = 0;
     camera = 0;
+
+    red = false;
+    green = false;
+    blue = false;
+    white = false;
+    spotlight = false;
 
     window.addEventListener("keydown", function(event) {
         switch (event.key) {
@@ -817,12 +823,34 @@ function render() {
 
     var lightPosition = [];
     var lightColor = [];
+    // (red, green, blue, white and spotlight)
     if(red) {
         lightPosition.push(mult(mv, vec4(20, 15, 20, 1)));
         lightColor.push(vec4(1.0, 0, 0, 1));
     } else {
         lightPosition.push(mult(mv, vec4(20, 15, 20, 1)));
         lightColor.push(vec4(0.0, 0, 0, 1));
+    }
+    if(green) {
+        lightPosition.push(mult(mv, vec4(-20, 15, 20, 1)));
+        lightColor.push(vec4(0, 1.0, 0, 1));
+    } else {
+        lightPosition.push(mult(mv, vec4(-20, 15, 20, 1)));
+        lightColor.push(vec4(0, 0.0, 0, 1));
+    }
+    if(blue) {
+        lightPosition.push(mult(mv, vec4(-20, 15, -20, 1)));
+        lightColor.push(vec4(0, 0, 1.0, 1));
+    } else {
+        lightPosition.push(mult(mv, vec4(-20, 15, -20, 1)));
+        lightColor.push(vec4(0, 0, 0.0, 1));
+    }
+    if(white) {
+        lightPosition.push(mult(mv, vec4(20, 15, -20, 1)));
+        lightColor.push(vec4(.5, .5, .5, 1));
+    } else {
+        lightPosition.push(mult(mv, vec4(20, 15, -20, 1)));
+        lightColor.push(vec4(0.0, 0.0, 0.0, 1));
     }
 
     lightPosition = flatten(lightPosition);

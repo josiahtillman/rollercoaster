@@ -39,11 +39,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="vshader-phong.glsl" pinned="false" current-in-tab="false">
+      <file leaf-file-name="vshader-phong.glsl" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/vshader-phong.glsl">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="390">
-              <caret line="26" column="41" lean-forward="true" selection-start-line="26" selection-start-column="41" selection-end-line="26" selection-end-column="41" />
+            <state relative-caret-position="495">
+              <caret line="33" column="47" lean-forward="true" selection-start-line="33" selection-start-column="47" selection-end-line="33" selection-end-column="47" />
               <folding />
             </state>
           </provider>
@@ -52,18 +52,18 @@
       <file leaf-file-name="fshader-phong.glsl" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/fshader-phong.glsl">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="375">
-              <caret line="25" column="42" lean-forward="false" selection-start-line="25" selection-start-column="42" selection-end-line="25" selection-end-column="42" />
+            <state relative-caret-position="360">
+              <caret line="24" column="26" lean-forward="true" selection-start-line="24" selection-start-column="26" selection-end-line="24" selection-end-column="26" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="rollercoaster.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="rollercoaster.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/rollercoaster.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="492">
-              <caret line="830" column="98" lean-forward="true" selection-start-line="830" selection-start-column="98" selection-end-line="830" selection-end-column="98" />
+            <state relative-caret-position="735">
+              <caret line="852" column="48" lean-forward="true" selection-start-line="852" selection-start-column="48" selection-end-line="852" selection-end-column="48" />
               <folding />
             </state>
           </provider>
@@ -73,8 +73,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>v</find>
-      <find>add</find>
       <find>scal</find>
       <find>generateSphere</find>
       <find>dot</find>
@@ -101,8 +99,10 @@
       <find>uniform4fv</find>
       <find>light_po</find>
       <find>light_pos</find>
-      <find>light_color</find>
       <find>light_p</find>
+      <find>light_color</find>
+      <find>_vec</find>
+      <find>red</find>
     </findStrings>
     <replaceStrings>
       <replace>, 0.5*M</replace>
@@ -121,8 +121,8 @@
         <option value="$PROJECT_DIR$/MV.js" />
         <option value="$PROJECT_DIR$/rollercoaster.html" />
         <option value="$PROJECT_DIR$/vshader-phong.glsl" />
-        <option value="$PROJECT_DIR$/fshader-phong.glsl" />
         <option value="$PROJECT_DIR$/rollercoaster.js" />
+        <option value="$PROJECT_DIR$/fshader-phong.glsl" />
       </list>
     </option>
   </component>
@@ -152,6 +152,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -164,7 +165,6 @@
         </subPane>
       </pane>
       <pane id="Scratches" />
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -222,12 +222,13 @@
       <workItem from="1509029975290" duration="470000" />
       <workItem from="1509060906864" duration="10562000" />
       <workItem from="1509127294000" duration="424000" />
-      <workItem from="1509223540783" duration="2497000" />
+      <workItem from="1509223540783" duration="4670000" />
+      <workItem from="1509401431674" duration="751000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="46417000" />
+    <option name="totallyTimeSpent" value="49341000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1680" height="1023" extended-state="0" />
@@ -630,26 +631,26 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/rollercoaster.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="735">
+          <caret line="852" column="48" lean-forward="true" selection-start-line="852" selection-start-column="48" selection-end-line="852" selection-end-column="48" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/fshader-phong.glsl">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="375">
-          <caret line="25" column="42" lean-forward="false" selection-start-line="25" selection-start-column="42" selection-end-line="25" selection-end-column="42" />
+        <state relative-caret-position="360">
+          <caret line="24" column="26" lean-forward="true" selection-start-line="24" selection-start-column="26" selection-end-line="24" selection-end-column="26" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/vshader-phong.glsl">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="390">
-          <caret line="26" column="41" lean-forward="true" selection-start-line="26" selection-start-column="41" selection-end-line="26" selection-end-column="41" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/rollercoaster.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="492">
-          <caret line="830" column="98" lean-forward="true" selection-start-line="830" selection-start-column="98" selection-end-line="830" selection-end-column="98" />
+        <state relative-caret-position="495">
+          <caret line="33" column="47" lean-forward="true" selection-start-line="33" selection-start-column="47" selection-end-line="33" selection-end-column="47" />
           <folding />
         </state>
       </provider>

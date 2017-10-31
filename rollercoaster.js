@@ -59,6 +59,8 @@ var vSpecularExponent;
 var light_position;
 var light_color;
 var ambient_light;
+var spotlight_vector;
+var spotlight_position;
 
 
 window.onload = function init() {
@@ -81,6 +83,8 @@ window.onload = function init() {
     vSpecularExponent = gl.getAttribLocation(program, "vSpecularExponent");
     light_position = gl.getUniformLocation(program, "light_position");
     light_color = gl.getUniformLocation(program, "light_color");
+    spotlight_vector = gl.getUniformLocation(program, "spotlight_vector");
+    spotlight_position = gl.getUniformLocation(program, "spotlight_position");
 
     // Initialize global variables
     carposition = [0, 0, 0, -1, 0, 0];
@@ -501,131 +505,36 @@ function makeShapes() {
 
     carStart = shapePoints.length/3;
 
-    // The car
-    // red side (towards us)
-    shapePoints.push(vec4(1.5, -0.5, -1.0, 1.0));
-    shapePoints.push(vec4(1.0, 0.0, 0.0, 1.0)); //color
-    shapePoints.push(vec4(0, 0, -1.0, 0.0)); //normal
-    shapePoints.push(vec4(1.5, 0.5, -1.0, 1.0));
-    shapePoints.push(vec4(1.0, 0.0, 0.0, 1.0)); //color
-    shapePoints.push(vec4(0, 0, -1.0, 0.0)); //normal
-    shapePoints.push(vec4(-1.5, 0.5, -1.0, 1.0));
-    shapePoints.push(vec4(1.0, 0.0, 0.0, 1.0)); //color
-    shapePoints.push(vec4(0, 0, -1.0, 0.0)); //normal
-    shapePoints.push(vec4(1.5, -0.5, -1.0, 1.0));
-    shapePoints.push(vec4(1.0, 0.0, 0.0, 1.0)); //color
-    shapePoints.push(vec4(0, 0, -1.0, 0.0)); //normal
-    shapePoints.push(vec4(-1.5, -0.5, -1.0, 1.0));
-    shapePoints.push(vec4(1.0, 0.0, 0.0, 1.0)); //color
-    shapePoints.push(vec4(0, 0, -1.0, 0.0)); //normal
-    shapePoints.push(vec4(-1.5, 0.5, -1.0, 1.0));
-    shapePoints.push(vec4(1.0, 0.0, 0.0, 1.0)); //color
-    shapePoints.push(vec4(0, 0, -1.0, 0.0)); //normal
+    var subdiv = 15;
+    var step = (360.0 / subdiv)*(Math.PI / 180.0);
 
-    // blue side (away from us)
-    shapePoints.push(vec4(1.5, -0.5, 1.0, 1.0));
-    shapePoints.push(vec4(0.0, 0.0, 1.0, 1.0)); //color
-    shapePoints.push(vec4(0, 0, 1.0, 0.0)); //normal
-    shapePoints.push(vec4(1.5, 0.5, 1.0, 1.0));
-    shapePoints.push(vec4(0.0, 0.0, 1.0, 1.0)); //color
-    shapePoints.push(vec4(0, 0, 1.0, 0.0)); //normal
-    shapePoints.push(vec4(-1.5, 0.5, 1.0, 1.0));
-    shapePoints.push(vec4(0.0, 0.0, 1.0, 1.0)); //color
-    shapePoints.push(vec4(0, 0, 1.0, 0.0)); //normal
-    shapePoints.push(vec4(1.5, -0.5, 1.0, 1.0));
-    shapePoints.push(vec4(0.0, 0.0, 1.0, 1.0)); //color
-    shapePoints.push(vec4(0, 0, 1.0, 0.0)); //normal
-    shapePoints.push(vec4(-1.5, -0.5, 1.0, 1.0));
-    shapePoints.push(vec4(0.0, 0.0, 1.0, 1.0)); //color
-    shapePoints.push(vec4(0, 0, 1.0, 0.0)); //normal
-    shapePoints.push(vec4(-1.5, 0.5, 1.0, 1.0));
-    shapePoints.push(vec4(0.0, 0.0, 1.0, 1.0)); //color
-    shapePoints.push(vec4(0, 0, 1.0, 0.0)); //normal
+    for (var lat = 0; lat <= Math.PI ; lat += step){ //latitude
+        for (var lon = 0; lon + step <= 2*Math.PI; lon += step){ //longitude
+            //triangle 1
+            shapePoints.push(vec4(0.6*Math.sin(lat)*Math.cos(lon), 0.6*Math.sin(lon)*Math.sin(lat), 0.6*Math.cos(lat), 1.0)); //position
+            shapePoints.push(vec4(1.0, 0.2, 0.2, 1.0));
+            shapePoints.push(vec4(0.6*Math.sin(lat)*Math.cos(lon), 0.6*Math.sin(lon)*Math.sin(lat), 0.6*Math.cos(lat), 0.0)); //normal
+            shapePoints.push(vec4(0.6*Math.sin(lat)*Math.cos(lon+step), 0.6*Math.sin(lat)*Math.sin(lon+step), 0.6*Math.cos(lat), 1.0)); //position
+            shapePoints.push(vec4(1.0, 0.2, 0.2, 1.0));
+            shapePoints.push(vec4(0.6*Math.sin(lat)*Math.cos(lon+step), 0.6*Math.sin(lat)*Math.sin(lon+step), 0.6*Math.cos(lat), 0.0)); //normal
+            shapePoints.push(vec4(0.6*Math.sin(lat+step)*Math.cos(lon+step), 0.6*Math.sin(lon+step)*Math.sin(lat+step), 0.6*Math.cos(lat+step), 1.0)); //etc
+            shapePoints.push(vec4(1.0, 0.2, 0.2, 1.0));
+            shapePoints.push(vec4(0.6*Math.sin(lat+step)*Math.cos(lon+step), 0.6*Math.sin(lon+step)*Math.sin(lat+step), 0.6*Math.cos(lat+step), 0.0));
 
-    // magenta side (to the right)
-    shapePoints.push(vec4(1.5, -0.5, 1.0, 1.0));
-    shapePoints.push(vec4(1.0, 0.0, 1.0, 1.0)); //color
-    shapePoints.push(vec4(1.0, 0, 0, 0.0)); //normal
-    shapePoints.push(vec4(1.5, 0.5, 1.0, 1.0));
-    shapePoints.push(vec4(1.0, 0.0, 1.0, 1.0)); //color
-    shapePoints.push(vec4(1.0, 0, 0, 0.0)); //normal
-    shapePoints.push(vec4(1.5, 0.5, -1.0, 1.0));
-    shapePoints.push(vec4(1.0, 0.0, 1.0, 1.0)); //color
-    shapePoints.push(vec4(1.0, 0, 0, 0.0)); //normal
-    shapePoints.push(vec4(1.5, -0.5, 1.0, 1.0));
-    shapePoints.push(vec4(1.0, 0.0, 1.0, 1.0)); //color
-    shapePoints.push(vec4(1.0, 0, 0, 0.0)); //normal
-    shapePoints.push(vec4(1.5, -0.5, -1.0, 1.0));
-    shapePoints.push(vec4(1.0, 0.0, 1.0, 1.0)); //color
-    shapePoints.push(vec4(1.0, 0, 0, 0.0)); //normal
-    shapePoints.push(vec4(1.5, 0.5, -1.0, 1.0));
-    shapePoints.push(vec4(1.0, 0.0, 1.0, 1.0)); //color
-    shapePoints.push(vec4(1.0, 0, 0, 0.0)); //normal
-
-    // cyan side (to the left)
-    shapePoints.push(vec4(-1.5, -0.5, 1.0, 1.0));
-    shapePoints.push(vec4(0.0, 1.0, 1.0, 1.0)); //color
-    shapePoints.push(vec4(-1.0, 0, 0, 0.0)); //normal
-    shapePoints.push(vec4(-1.5, 0.5, 1.0, 1.0));
-    shapePoints.push(vec4(0.0, 1.0, 1.0, 1.0)); //color
-    shapePoints.push(vec4(-1.0, 0, 0, 0.0)); //normal
-    shapePoints.push(vec4(-1.5, 0.5, -1.0, 1.0));
-    shapePoints.push(vec4(0.0, 1.0, 1.0, 1.0)); //color
-    shapePoints.push(vec4(-1.0, 0, 0, 0.0)); //normal
-    shapePoints.push(vec4(-1.5, -0.5, 1.0, 1.0));
-    shapePoints.push(vec4(0.0, 1.0, 1.0, 1.0)); //color
-    shapePoints.push(vec4(-1.0, 0, 0, 0.0)); //normal
-    shapePoints.push(vec4(-1.5, -0.5, -1.0, 1.0));
-    shapePoints.push(vec4(0.0, 1.0, 1.0, 1.0)); //color
-    shapePoints.push(vec4(-1.0, 0, 0, 0.0)); //normal
-    shapePoints.push(vec4(-1.5, 0.5, -1.0, 1.0));
-    shapePoints.push(vec4(0.0, 1.0, 1.0, 1.0)); //color
-    shapePoints.push(vec4(-1.0, 0, 0, 0.0)); //normal
-
-    // yellow side (pointing down)
-    shapePoints.push(vec4(1.5, -0.5, -1.0, 1.0));
-    shapePoints.push(vec4(1.0, 1.0, 0.0, 1.0)); //color
-    shapePoints.push(vec4(0, -1.0, 0, 0.0)); //normal
-    shapePoints.push(vec4(1.5, -0.5, 1.0, 1.0));
-    shapePoints.push(vec4(1.0, 1.0, 0.0, 1.0)); //color
-    shapePoints.push(vec4(0, -1.0, 0, 0.0)); //normal
-    shapePoints.push(vec4(-1.5, -0.5, -1.0, 1.0));
-    shapePoints.push(vec4(1.0, 1.0, 0.0, 1.0)); //color
-    shapePoints.push(vec4(0, -1.0, 0, 0.0)); //normal
-    shapePoints.push(vec4(1.5, -0.5, 1.0, 1.0));
-    shapePoints.push(vec4(1.0, 1.0, 0.0, 1.0)); //color
-    shapePoints.push(vec4(0, -1.0, 0, 0.0)); //normal
-    shapePoints.push(vec4(-1.5, -0.5, -1.0, 1.0));
-    shapePoints.push(vec4(1.0, 1.0, 0.0, 1.0)); //color
-    shapePoints.push(vec4(0, -1.0, 0, 0.0)); //normal
-    shapePoints.push(vec4(-1.5, -0.5, 1.0, 1.0));
-    shapePoints.push(vec4(1.0, 1.0, 0.0, 1.0)); //color
-    shapePoints.push(vec4(0, -1.0, 0, 0.0)); //normal
-
-    // top yellow side (pointing up)
-    shapePoints.push(vec4(1.5, 0.5, -1.0, 1.0));
-    shapePoints.push(vec4(1.0, 1.0, 0.0, 1.0)); //color
-    shapePoints.push(vec4(0, 1.0, 0, 0.0)); //normal
-    shapePoints.push(vec4(1.5, 0.5, 1.0, 1.0));
-    shapePoints.push(vec4(1.0, 1.0, 0.0, 1.0)); //color
-    shapePoints.push(vec4(0, 1.0, 0, 0.0)); //normal
-    shapePoints.push(vec4(-1.5, 0.5, -1.0, 1.0));
-    shapePoints.push(vec4(1.0, 1.0, 0.0, 1.0)); //color
-    shapePoints.push(vec4(0, 1.0, 0, 0.0)); //normal
-    shapePoints.push(vec4(1.5, 0.5, 1.0, 1.0));
-    shapePoints.push(vec4(1.0, 1.0, 0.0, 1.0)); //color
-    shapePoints.push(vec4(0, 1.0, 0, 0.0)); //normal
-    shapePoints.push(vec4(-1.5, 0.5, -1.0, 1.0));
-    shapePoints.push(vec4(1.0, 1.0, 0.0, 1.0)); //color
-    shapePoints.push(vec4(0, 1.0, 0, 0.0)); //normal
-    shapePoints.push(vec4(-1.5, 0.5, 1.0, 1.0));
-    shapePoints.push(vec4(1.0, 1.0, 0.0, 1.0)); //color
-    shapePoints.push(vec4(0, 1.0, 0, 0.0)); //normal
+            //triangle 2
+            shapePoints.push(vec4(0.6*Math.sin(lat+step)*Math.cos(lon+step), 0.6*Math.sin(lon+step)*Math.sin(lat+step), 0.6*Math.cos(lat+step), 1.0));
+            shapePoints.push(vec4(1.0, 0.2, 0.2, 1.0));
+            shapePoints.push(vec4(0.6*Math.sin(lat+step)*Math.cos(lon+step), 0.6*Math.sin(lon+step)*Math.sin(lat+step), 0.6*Math.cos(lat+step), 0.0));
+            shapePoints.push(vec4(0.6*Math.sin(lat+step)*Math.cos(lon), 0.6*Math.sin(lat+step)*Math.sin(lon), 0.6*Math.cos(lat+step), 1.0));
+            shapePoints.push(vec4(1.0, 0.2, 0.2, 1.0));
+            shapePoints.push(vec4(0.6*Math.sin(lat+step)*Math.cos(lon), 0.6*Math.sin(lat+step)*Math.sin(lon), 0.6*Math.cos(lat+step),0.0));
+            shapePoints.push(vec4(0.6*Math.sin(lat)*Math.cos(lon), 0.6*Math.sin(lon)*Math.sin(lat), 0.6*Math.cos(lat), 1.0));
+            shapePoints.push(vec4(1.0, 0.2, 0.2, 1.0));
+            shapePoints.push(vec4(0.6*Math.sin(lat)*Math.cos(lon), 0.6*Math.sin(lon)*Math.sin(lat), 0.6*Math.cos(lat), 0.0));
+        }
+    }
 
     carLength = shapePoints.length/3 - carStart;
-
-    // TODO use define statements to give names to the indices
-    // TODO use a seperate file with the indices for different objects (mesh)?
 
     // wheels
     var vertexNum = 50;
@@ -746,7 +655,7 @@ function bufferShapes() {
 
 function update() {
     if (moving) {
-        wheelRotation -= 10
+        wheelRotation += 10;
         // if it's back at the beginning, set back to 0 1 and 2
         if (fileExists) {
             if (carx+3 < carposition.length) {
@@ -816,6 +725,27 @@ function render() {
     }
     var newmv = mult(mv, rotateX(90));
 
+    gl.uniformMatrix4fv(umv, false, flatten(newmv));
+    gl.drawArrays(gl.TRIANGLE_FAN, 0, 4); // draw the ground
+
+    // Create the transform matrix
+    if (fileExists) {
+        var tempUp = normalize(vec4(0, 1, 0, 0));
+        var forward = normalize(subtract(vec4(carposition[(carx + 3) % (carposition.length)], carposition[(cary + 3) % (carposition.length)], carposition[(carz + 3) % (carposition.length)], 1),
+            vec4(carposition[carx], carposition[cary], carposition[carz], 1)));
+        var right = vec4(normalize(cross(forward, tempUp)), 0);
+        var point = vec4(carposition[carx], carposition[cary], carposition[carz], 1);
+        var up = vec4(normalize(cross(right, forward)), 0);
+        var transformMatrix = transpose(mat4(right, up, forward, point)); // transpose because mat4 uses rows to make mat4
+        var matrix = mult(mv, transformMatrix);
+        matrix = mult(matrix, translate(0, 1.25, 0));
+        matrix = mult(matrix, rotateY(90));
+    } else {
+        // If there isn't a loaded file, give this default transformation matrix
+        matrix = mv;
+        matrix = mult(matrix, translate(0, 1, 0));
+    }
+
     // Create the light attributes and uniforms
     gl.uniform4fv(ambient_light, vec4(.1, .1, .1, 1)); // every spot is getting at least this much light
     gl.vertexAttrib4fv(vSpecularColor, vec4(1.0, 1.0, 1.0, 1.0)); // specular highlight will reflect everything
@@ -852,10 +782,18 @@ function render() {
         lightPosition.push(mult(mv, vec4(20, 15, -20, 1)));
         lightColor.push(vec4(0.0, 0.0, 0.0, 1));
     }
+    var spotlightPosition = mult(matrix, vec4(-1, 0, 0, 1.0));
+    var spotlightVector = mult(matrix, vec4(1, 0, 0, 0.0));
+    if(spotlight) {
+        lightColor.push(vec4(.5, .5, .5, 1));
+    } else {
+        lightColor.push(vec4(0.0, 0.0, 0.0, 1));
+    }
 
     lightPosition = flatten(lightPosition);
     lightColor = flatten(lightColor);
-
+    gl.uniform4fv(spotlight_position, spotlightPosition);
+    gl.uniform4fv(spotlight_vector, spotlightVector);
     gl.uniform4fv(light_position, lightPosition); // This is the position of the xyzw of the light
     // multiply it by mv so it can be in eyespace
     gl.uniform4fv(light_color, lightColor); // a 100% light, (BRIGHT)
@@ -865,26 +803,11 @@ function render() {
     //draw the geometry we previously sent over.  It's a list of 12 triangle(s),
     //we want to start at index 0, and there will be a total of 36 vertices (6 faces with 6 vertices each)
 
+    newmv = matrix;
+    newmv = mult(newmv, translate(-1.75, 0, 0));
+    newmv = mult(newmv, scalem(0.1, 0.75, 0.75));
     gl.uniformMatrix4fv(umv, false, flatten(newmv));
-    gl.drawArrays(gl.TRIANGLE_FAN, 0, 4); // draw the ground
-
-    // Create the transform matrix
-    if (fileExists) {
-        var tempUp = normalize(vec4(0, 1, 0, 0));
-        var forward = normalize(subtract(vec4(carposition[(carx + 3) % (carposition.length)], carposition[(cary + 3) % (carposition.length)], carposition[(carz + 3) % (carposition.length)], 1),
-            vec4(carposition[carx], carposition[cary], carposition[carz], 1)));
-        var right = vec4(normalize(cross(forward, tempUp)), 0);
-        var point = vec4(carposition[carx], carposition[cary], carposition[carz], 1);
-        var up = vec4(normalize(cross(right, forward)), 0);
-        var transformMatrix = transpose(mat4(right, up, forward, point)); // transpose because mat4 uses rows to make mat4
-        var matrix = mult(mv, transformMatrix);
-        matrix = mult(matrix, translate(0, 1.25, 0));
-        matrix = mult(matrix, rotateY(90));
-    } else {
-        // If there isn't a loaded file, give this default transformation matrix
-        matrix = mv;
-        matrix = mult(matrix, translate(0, 1, 0));
-    }
+    gl.drawArrays(gl.TRIANGLES, riderHeadStart, riderHeadLength); // draw the spotlight
 
     newmv = mv;
     newmv = mult(newmv, translate(20, 15, 20));
@@ -907,6 +830,7 @@ function render() {
     gl.drawArrays(gl.TRIANGLES, riderHeadStart, riderHeadLength); // draw the red light
 
     newmv = matrix;
+    newmv = mult(newmv, scalem(3, 1, 2));
     gl.uniformMatrix4fv(umv, false, flatten(newmv));
     gl.drawArrays(gl.TRIANGLES, carStart, carLength); // draw the car
 

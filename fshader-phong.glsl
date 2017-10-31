@@ -2,6 +2,7 @@
 precision mediump float;
 
 in vec3 N;
+in vec3 E;
 in vec3 redL;
 in vec3 redH;
 in vec3 greenL;
@@ -14,11 +15,14 @@ in vec3 whiteH;
 in vec4 SpecularColor;
 in float SpecularExponent;
 in vec4 Color;
+in vec4 spotlightPosition;
+in vec4 EyePos;
 
 out vec4 fColor;
 
-uniform vec4 light_color[4];
+uniform vec4 light_color[5];
 uniform vec4 ambient_light;
+uniform vec4 spotlight_vector;
 
 void main()
 {
@@ -31,6 +35,7 @@ void main()
     vec3 blueH = normalize(blueH);
     vec3 whiteL = normalize(whiteL);
     vec3 whiteH = normalize(whiteH);
+    vec3 spotlightVector = normalize(spotlight_vector.xyz);
 
     vec4 amb = Color * ambient_light; // ambient&diffuse properties for the light formula
     // red
@@ -45,6 +50,13 @@ void main()
     // white
     diff = diff + (max(dot(whiteL, N), 0.0) * Color * light_color[3]);
     spec = spec + (SpecularColor * light_color[3] * pow(max(dot(N, whiteH), 0.0), SpecularExponent));
+    // spotlight
+    vec3 spotlightL = normalize(spotlightPosition.xyz - EyePos.xyz);
+    vec3 spotlightH = normalize(spotlightL+E);
+    if(dot(spotlightL, spotlightVector) > cos(radians(20.0))) {
+        diff = diff + (max(dot(spotlightL, N), 0.0) * Color * light_color[4]);
+        spec = spec + (SpecularColor * light_color[4] * pow(max(dot(N, spotlightH), 0.0), SpecularExponent));
+    }
 
     fColor = amb + diff + spec;
 }

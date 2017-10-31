@@ -7,6 +7,7 @@ in float vSpecularExponent;
 in vec4 vColor;
 
 out vec3 N;
+out vec3 E;
 out vec3 redL;
 out vec3 redH;
 out vec3 greenL;
@@ -19,16 +20,19 @@ out vec3 whiteH;
 out vec4 SpecularColor;
 out float SpecularExponent;
 out vec4 Color;
+out vec4 EyePos;
+out vec4 spotlightPosition;
 
 uniform mat4 model_view;
 uniform mat4 projection;
 uniform vec4 light_position[4];
+uniform vec4 spotlight_position;
 
 void main() {
     vec4 veyepos = model_view*vPosition; // world to eye space
 
     // using .xyz is known as swizzling. Grabs the first three values in the vector
-    vec3 E = normalize(-veyepos.xyz); // vector pointing to camera
+    E = normalize(-veyepos.xyz); // vector pointing to camera
     N = normalize(model_view*vNormal).xyz; // normal vector
     redL = normalize(light_position[0].xyz - veyepos.xyz); // light vector
     redH = normalize(redL+E); // halfway vector
@@ -42,6 +46,8 @@ void main() {
     SpecularColor = vSpecularColor;
     SpecularExponent = vSpecularExponent;
     Color = vColor;
+    EyePos = veyepos;
+    spotlightPosition = spotlight_position;
 
     gl_Position = projection * veyepos;
 }
